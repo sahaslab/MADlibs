@@ -1,6 +1,7 @@
 from abc import ABC, abstractmethod
 from typing import Optional
 
+
 class IPrompt(ABC):
     @abstractmethod
     def get_prompts(self, n_prompts: int, seed: Optional[int] = None) -> list[str]:

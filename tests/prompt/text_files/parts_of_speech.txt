@@ -1,0 +1,16 @@
+*noun*
+guitar, microphone, river, tree
+*verb*
+sing, play, eat, snap
+*adv*
+slowly, quickly, loudly, emotionally
+*adj*
+big, loud, soft, green
+*relative_adv*
+where, when
+*article*
+a, the
+*pronoun*
+they, I
+*conjunction*
+and, but, so

@@ -6,11 +6,6 @@ import uuid
 import argparse
 
 
-def prompt_madlibs(vocab_file, n_prompts):
-    prompt_gen = MadlibsPrompt(part_of_speech_filename=vocab_file)
-    prompts = prompt_gen.get_prompts(n_prompts=n_prompts)
-    return prompts
-
 
 def prompt_musicgen(prompts):
     processor = AutoProcessor.from_pretrained("facebook/musicgen-large")
@@ -65,10 +60,11 @@ def main():
     vocab = args.vocab
     prompt_type = args.type
     n_prompts = args.n_prompts
-    prompts = []
+    prompt_gen = None
     if prompt_type == "madlibs":
-        prompts = prompt_madlibs(vocab, n_prompts)
-    audio_values, sr = prompt_musicgen(prompts)
+         prompt_gen = MadlibsPrompt(part_of_speech_filename=vocab)
+    prompts = prompt_gen.get_prompts(n_prompts=n_prompts)
+    audio_values, sr = (prompts)
     save_musicgen_outputs(prompts, audio_values, output_dir, sr)
 
 

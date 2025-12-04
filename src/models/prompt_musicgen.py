@@ -64,7 +64,7 @@ def main():
     if prompt_type == "madlibs":
          prompt_gen = MadlibsPrompt(part_of_speech_filename=vocab)
     prompts = prompt_gen.get_prompts(n_prompts=n_prompts)
-    audio_values, sr = (prompts)
+    audio_values, sr = prompt_musicgen(prompts)
     save_musicgen_outputs(prompts, audio_values, output_dir, sr)
 
 

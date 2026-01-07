@@ -42,10 +42,14 @@ class MadlibsPrompt(IPrompt):
             "{article} {noun} {verb}s {article} {noun}.",
             "{pronoun} {adv} {verb}s {article} {noun}.",
             "{article} {noun} {verb}s {conjunction} {pronoun} {verb}s.",
-            "{article} {adj} {noun} {verb}s {relative_adv} {article} {adj} {noun} {verb}s."
+            "{article} {adj} {noun} {verb}s {relative_adv} {article} {adj} {noun} {verb}s.",
         ]
 
-        self.prompt_starts = ["Please give me a song where ", "Song that ", "Write me a song where "]
+        self.prompt_starts = [
+            "Please give me a song where ",
+            "Song that ",
+            "Write me a song where ",
+        ]
 
     def get_prompts(self, n_prompts, seed=None):
         random.seed(seed)
@@ -65,7 +69,7 @@ class MadlibsPrompt(IPrompt):
                 adj=random.choice(self.words["adj"]),
                 relative_adv=random.choice(self.words["relative_adv"]),
                 pronoun=random.choice(self.words["pronoun"]),
-                conjunction=random.choice(self.words["conjunction"])
+                conjunction=random.choice(self.words["conjunction"]),
             )
 
             prompts.append(prompt)

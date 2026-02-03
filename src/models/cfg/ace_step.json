@@ -1,0 +1,24 @@
+{
+    "lyrics": "[inst]",
+    "audio_duration": 60,
+    "infer_step": 100,
+    "guidance_scale": 15,
+    "scheduler_type": "euler",
+    "cfg_type": "apg",
+    "omega_scale": 10,
+    "guidance_interval": 0.5,
+    "guidance_interval_decay": 0,
+    "min_guidance_scale": 3,
+    "use_erg_tag": true,
+    "use_erg_lyric": true,
+    "use_erg_diffusion": true,
+    "oss_steps": [],
+    "timecosts": {
+        "preprocess": 0.02882218360900879,
+        "diffusion": 16.91233205795288,
+        "latent2audio": 1.7794082164764404
+    },
+    "actual_seeds": [
+        123097235
+    ]
+}

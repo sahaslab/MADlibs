@@ -6,6 +6,7 @@ from src.prompt.MadlibsPrompt import MadlibsPrompt
 import os
 import uuid
 import argparse
+import random
 
 
 def generate_acestep(json_data, prompt, save_path):
@@ -18,6 +19,7 @@ def generate_acestep(json_data, prompt, save_path):
         overlapped_decode=True,
     )
     json_data["prompt"] = prompt
+    json_data["actual_seeds"] = [random.randint(100000, 999999)]
 
     (
         audio_duration,

@@ -1,3 +1,5 @@
 ruff
 numpy
 pytest
+laion-clap
+apricot-select

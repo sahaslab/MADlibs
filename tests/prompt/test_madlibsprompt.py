@@ -14,4 +14,4 @@ def test_output_with_set_seed():
         part_of_speech_filename="tests/prompt/text_files/parts_of_speech.txt"
     )
     prompts = prompt_gen.get_prompts(n_prompts=1, seed=1)
-    assert prompts[0] == "Please give me a song where a river sings and I sings."
+    assert prompts[0] == "Please give me a song where a guitar snaps and I snaps."

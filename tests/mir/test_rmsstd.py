@@ -6,8 +6,6 @@ import librosa
 def test_rmsstd_on_ace_step():
     rms = RMSStd()
     audio, sr = librosa.load("tests/mir/ace_step_test.wav")
-    rms.process_audio("test_audio", audio, sr=sr)
-    assert rms.get_single_analysis("test_audio") == pytest.approx(0.07127465, rel=1e-3)
-
-    assert type(rms.get_analysis()) == dict
-    assert "test_audio" in rms.get_analysis()
+    output = rms.process_audio(data=audio, sr=sr)
+    assert list(output.keys())[0] == "rmsstd" and len(output.keys()) == 1
+    assert output["rmsstd"] == pytest.approx(0.07127465, rel=1e-3)

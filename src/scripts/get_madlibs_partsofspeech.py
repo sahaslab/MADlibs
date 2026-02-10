@@ -6,8 +6,8 @@ if __name__ == "__main__":
     SDD_PATH = "src/scripts/song_describer.csv"
 
     nltk.download("punkt")
-    nltk.download('punkt_tab')
-    nltk.download('averaged_perceptron_tagger_eng')
+    nltk.download("punkt_tab")
+    nltk.download("averaged_perceptron_tagger_eng")
     nltk.download("averaged_perceptron_tagger")
 
     # POS MAP from ChatGPT
@@ -30,16 +30,15 @@ if __name__ == "__main__":
         "relative_adv": set(),
         "article": set(),
         "pronoun": set(),
-        "conjunction": set()
+        "conjunction": set(),
     }
 
-
-    with open(SDD_PATH, mode='r') as file:
+    with open(SDD_PATH, mode="r") as file:
         csvFile = csv.reader(file)
 
         for line in csvFile:
             desc = line[2]
-            
+
             tokens = word_tokenize(desc)
             tagged = pos_tag(tokens)
 
@@ -51,7 +50,7 @@ if __name__ == "__main__":
                         pos[category].add(word_lower)
                         break
 
-    with open('./parts_of_speech.txt', mode='w') as file:
+    with open("./parts_of_speech.txt", mode="w") as file:
         for part_of_speech, speech_list in pos.items():
             speech_list_line = ", ".join(speech_list)
             file.write(f"*{part_of_speech}*\n")

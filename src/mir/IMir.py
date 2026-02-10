@@ -1,6 +1,7 @@
 from abc import ABC, abstractmethod
 import numpy as np
 
+
 class IMir(ABC):
     @abstractmethod
     def process_audio(self, data: np.ndarray, sr: int) -> dict[str, np.ndarray]:

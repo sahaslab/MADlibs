@@ -2,6 +2,7 @@ import numpy as np
 
 from src.mir.RMSStd import RMSStd
 
+
 def process(audio: np.ndarray, sr: float, metadata: list = []) -> dict:
     """
     Process all MIR analysis for an audio and store in a k, v store
@@ -11,7 +12,7 @@ def process(audio: np.ndarray, sr: float, metadata: list = []) -> dict:
         - sr: sample rate
         - metadata: any attached metadata like song name, model source, etc
     Returns:
-        - key, value store with key being type of analysis 
+        - key, value store with key being type of analysis
             and val is the analysis output
     """
     audio_analysis = [RMSStd()]
@@ -25,5 +26,5 @@ def process(audio: np.ndarray, sr: float, metadata: list = []) -> dict:
         # flatten dict
         for k, v in output.items():
             processed[k] = v
-    
+
     return processed

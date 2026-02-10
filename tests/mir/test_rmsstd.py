@@ -3,6 +3,7 @@ from src.mir.RMSStd import RMSStd
 import pytest
 import librosa
 
+
 def test_rmsstd_on_ace_step():
     rms = RMSStd()
     audio, sr = librosa.load("tests/mir/ace_step_test.wav")

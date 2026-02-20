@@ -4,3 +4,6 @@ pytest
 https://github.com/CPJKU/beat_this/archive/main.zip
 librosa
 torch
+soundfile
+ace-step
+"transformers[torch]"

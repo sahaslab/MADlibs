@@ -1,20 +1,36 @@
 import numpy as np
+import librosa
+import torch
+from beat_this.inference import File2Beats
 
 from src.mir.RMSStd import RMSStd
 
 
-def process(audio: np.ndarray, sr: float, metadata: list = []) -> dict:
+def process(audio_filename: str, metadata: list = []) -> dict:
     """
     Process all MIR analysis for an audio and store in a k, v store
 
     Args:
-        - audio: quantized audio
-        - sr: sample rate
+        - audio_filename: the filename for the audio
         - metadata: any attached metadata like song name, model source, etc
     Returns:
         - key, value store with key being type of analysis
             and val is the analysis output
     """
+    # Hack fix for beat this torch error
+    if not hasattr(torch.amp, "is_autocast_available"):
+
+        def is_autocast_available(device_type):
+            return False
+
+        torch.amp.is_autocast_available = is_autocast_available
+
+    # All external library pre processing TODO maybe clean up
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    file2beats = File2Beats(checkpoint_path="final0", device=device, dbn=False)
+    beats, downbeats = file2beats(audio_filename)
+    audio, sr = librosa.load(audio_filename)
+
     audio_analysis = [RMSStd()]
 
     # TODO add other types of analysis i.e. spectrogram analysis, symbolic analysis

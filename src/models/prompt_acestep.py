@@ -12,7 +12,7 @@ import random
 def generate_acestep(json_data, prompt, save_path):
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     model = ACEStepPipeline(
-        checkpoint_dir="/dartfs/rc/home/t/f00814t/lab/noah/imPROMPTu/ACE-Step/ACE-Step-v1-3.5B",
+        checkpoint_dir="ACE-Step/Ace-Step1.5",
         dtype="bfloat16",
         torch_compile=True,
         cpu_offload=False,

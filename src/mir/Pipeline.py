@@ -4,9 +4,10 @@ import torch
 from beat_this.inference import File2Beats
 
 from src.mir.RMSStd import RMSStd
+from src.mir.Tempo import Tempo
 
 
-def process(audio_filename: str, metadata: list = []) -> dict:
+def process(audio_filename: str, metadata: dict = {}) -> dict:
     """
     Process all MIR analysis for an audio and store in a k, v store
 
@@ -29,16 +30,21 @@ def process(audio_filename: str, metadata: list = []) -> dict:
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     file2beats = File2Beats(checkpoint_path="final0", device=device, dbn=False)
     beats, downbeats = file2beats(audio_filename)
-    audio, sr = librosa.load(audio_filename)
+    audio, _ = librosa.load(audio_filename)
 
     audio_analysis = [RMSStd()]
+    beat_analysis = [Tempo()]
 
-    # TODO add other types of analysis i.e. spectrogram analysis, symbolic analysis
-
+    metadata["audio_filename"] = audio_filename
     processed = {"metadata": metadata}
 
     for analysis in audio_analysis:
-        output = analysis.process_audio(data=audio, sr=sr)
+        output = analysis.process_audio(data=audio)
+        # flatten dict
+        for k, v in output.items():
+            processed[k] = v
+    for analysis in beat_analysis:
+        output = analysis.process_audio(data=(beats, downbeats))
         # flatten dict
         for k, v in output.items():
             processed[k] = v

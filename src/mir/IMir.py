@@ -4,7 +4,7 @@ import numpy as np
 
 class IMir(ABC):
     @abstractmethod
-    def process_audio(self, data: np.ndarray, sr: int) -> dict[str, np.ndarray]:
+    def process_audio(self, data: np.ndarray) -> dict[str, float]:
         """
         Process the audio data via given music information retrieval method
 

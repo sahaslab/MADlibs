@@ -5,7 +5,7 @@ import librosa
 
 
 class RMSStd(IMir):
-    def process_audio(self, data: np.ndarray, sr: int) -> dict[str, np.ndarray]:
+    def process_audio(self, data: np.ndarray) -> dict[str, float]:
         # Calculate RMS for default librosa frames
         rms = librosa.feature.rms(y=data)
         std = np.std(rms)

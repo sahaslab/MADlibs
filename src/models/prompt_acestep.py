@@ -1,5 +1,6 @@
-from acestep.data_sampler import DataSampler
-from acestep.pipeline_ace_step import ACEStepPipeline
+from acestep.handler import AceStepHandler
+from acestep.llm_inference import LLMHandler
+from acestep.inference import GenerationParams, GenerationConfig, generate_music
 import torch
 import json
 from src.prompt.MadlibsPrompt import MadlibsPrompt
@@ -9,86 +10,34 @@ import argparse
 import random
 
 
-def generate_acestep(json_data, prompt, save_path):
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    model = ACEStepPipeline(
-        checkpoint_dir="ACE-Step/Ace-Step1.5",
-        dtype="bfloat16",
-        torch_compile=True,
-        cpu_offload=False,
-        overlapped_decode=True,
-    )
-    json_data["prompt"] = prompt
-    json_data["actual_seeds"] = [random.randint(100000, 999999)]
-
-    (
-        audio_duration,
-        prompt,
-        lyrics,
-        infer_step,
-        guidance_scale,
-        scheduler_type,
-        cfg_type,
-        omega_scale,
-        manual_seeds,
-        guidance_interval,
-        guidance_interval_decay,
-        min_guidance_scale,
-        use_erg_tag,
-        use_erg_lyric,
-        use_erg_diffusion,
-        oss_steps,
-        guidance_scale_text,
-        guidance_scale_lyric,
-    ) = sample_data(json_data)
-
-    model(
-        audio_duration=audio_duration,
-        prompt=prompt,
-        lyrics=lyrics,
-        infer_step=infer_step,
-        guidance_scale=guidance_scale,
-        scheduler_type=scheduler_type,
-        cfg_type=cfg_type,
-        omega_scale=omega_scale,
-        manual_seeds=manual_seeds,
-        guidance_interval=guidance_interval,
-        guidance_interval_decay=guidance_interval_decay,
-        min_guidance_scale=min_guidance_scale,
-        use_erg_tag=use_erg_tag,
-        use_erg_lyric=use_erg_lyric,
-        use_erg_diffusion=use_erg_diffusion,
-        oss_steps=oss_steps,
-        guidance_scale_text=guidance_scale_text,
-        guidance_scale_lyric=guidance_scale_lyric,
-        save_path=save_path,
+def generate_acestep(prompt, save_path):
+    dit_handler = AceStepHandler()
+    llm_handler = LLMHandler()
+    model_path = "/dartfs/rc/home/t/f00814t/lab/noah/imPROMPTu/ACE-Step1.5/"
+    # Initialize services
+    dit_handler.initialize_service(
+        project_root=model_path, config_path="acestep-v15-turbo", device="cuda"
     )
 
+    llm_handler.initialize(
+        checkpoint_dir=model_path,
+        lm_model_path="acestep-5Hz-lm-0.6B",
+        backend="vllm",
+        device="cuda",
+    )
 
-def sample_data(json_data):
-    return (
-        json_data["audio_duration"],
-        json_data["prompt"],
-        json_data["lyrics"],
-        json_data["infer_step"],
-        json_data["guidance_scale"],
-        json_data["scheduler_type"],
-        json_data["cfg_type"],
-        json_data["omega_scale"],
-        ", ".join(map(str, json_data["actual_seeds"])),
-        json_data["guidance_interval"],
-        json_data["guidance_interval_decay"],
-        json_data["min_guidance_scale"],
-        json_data["use_erg_tag"],
-        json_data["use_erg_lyric"],
-        json_data["use_erg_diffusion"],
-        ", ".join(map(str, json_data["oss_steps"])),
-        json_data["guidance_scale_text"] if "guidance_scale_text" in json_data else 0.0,
-        (
-            json_data["guidance_scale_lyric"]
-            if "guidance_scale_lyric" in json_data
-            else 0.0
-        ),
+    # Configure generation parameters
+    params = GenerationParams(caption=prompt, instrumental=True)
+
+    # Configure generation settings
+    config = GenerationConfig(
+        batch_size=1,
+        audio_format="wav",
+    )
+
+    # Generate music
+    result = generate_music(
+        dit_handler, llm_handler, params, config, save_dir=save_path
     )
 
 
@@ -97,15 +46,13 @@ def save_acestep_outputs(prompts, output_dir, cfg):
     print(f"Saving outputs for run {str(run_id)}")
     run_path = os.path.join(output_dir, str(run_id))
     os.mkdir(run_path)
-    f = open(cfg)
-    json_data = json.load(f)
 
     for i, prompt in enumerate(prompts):
         write_path = os.path.join(run_path, f"prompt_{i}")
         os.mkdir(write_path)
         with open(os.path.join(write_path, "prompt.txt"), "w") as f:
             f.write(prompt)
-        generate_acestep(json_data, prompt, write_path)
+        generate_acestep(prompt, write_path)
 
 
 def main():

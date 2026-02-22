@@ -2,8 +2,10 @@ ruff
 numpy
 pytest
 https://github.com/CPJKU/beat_this/archive/main.zip
+https://github.com/ace-step/ACE-Step-1.5.git
 librosa
-torch
 soundfile
-ace-step
-"transformers[torch]"
+torch
+torchaudio
+torchcodec
+transformers[torch]

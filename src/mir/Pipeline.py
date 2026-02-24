@@ -4,6 +4,7 @@ import torch
 from beat_this.inference import File2Beats
 
 from src.mir.RMSStd import RMSStd
+from src.mir.ChromagramSum import ChromagramSum
 from src.mir.Tempo import Tempo
 
 
@@ -32,7 +33,7 @@ def process(audio_filename: str, metadata: dict = {}) -> dict:
     beats, downbeats = file2beats(audio_filename)
     audio, _ = librosa.load(audio_filename)
 
-    audio_analysis = [RMSStd()]
+    audio_analysis = [RMSStd(), ChromagramSum()]
     beat_analysis = [Tempo()]
 
     metadata["audio_filename"] = audio_filename

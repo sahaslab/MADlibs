@@ -10,3 +10,5 @@ torch
 torchaudio
 torchcodec
 transformers[torch]
+laion_clap
+apricot-select

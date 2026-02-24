@@ -12,3 +12,4 @@ def test_chromagram_sum():
 
     assert "chromasum" in output
     assert np.sum(output["chromasum"]) == pytest.approx(1, rel=1e-3)
+    assert output["chromasum"].shape == (12,)

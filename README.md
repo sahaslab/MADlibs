@@ -1,5 +1,5 @@
-# LMM-Gen-Distribution
-Study on the distribution of large music model generated output
+# MAD-libs
+Study on the distribution of generated outputs from **M**usicGen, **A**CE-Step, and **D**iffRhythm
 
 ## Dependencies
 Run `pip install -r requirements.txt` to install dependencies. 

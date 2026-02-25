@@ -41,7 +41,7 @@ def generate_acestep(prompt, save_path):
     )
 
 
-def save_acestep_outputs(prompts, output_dir, cfg):
+def save_acestep_outputs(prompts, output_dir):
     run_id = uuid.uuid1()
     print(f"Saving outputs for run {str(run_id)}")
     run_path = os.path.join(output_dir, str(run_id))
@@ -72,24 +72,18 @@ def main():
     parser.add_argument(
         "-t", "--type", help="Prompt Type (MadLibs, ...)", default="madlibs"
     )
-    parser.add_argument(
-        "-c",
-        "--cfg",
-        help="location of acestep default configuration",
-        default="src/models/cfg/ace_step.json",
-    )
+
     parser.add_argument("-n", "--n_prompts", help="Number of Prompts", default="100")
     args = parser.parse_args()
     output_dir = args.output_dir
     vocab = args.vocab
     prompt_type = args.type
-    model_cfg = args.cfg
     n_prompts = args.n_prompts
     prompt_gen = None
     if prompt_type == "madlibs":
         prompt_gen = MadlibsPrompt(part_of_speech_filename=vocab)
     prompts = prompt_gen.get_prompts(n_prompts=int(n_prompts))
-    save_acestep_outputs(prompts, output_dir, model_cfg)
+    save_acestep_outputs(prompts, output_dir)
 
 
 if __name__ == "__main__":

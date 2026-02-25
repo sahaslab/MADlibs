@@ -1,6 +1,5 @@
 import sys
 import os
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "diffrhythm")))
 import time
 import random
 import argparse
@@ -10,6 +9,7 @@ import torchaudio
 from huggingface_hub import hf_hub_download
 from einops import rearrange
 from muq import MuQMuLan
+from src.prompt.MadlibsPrompt import MadlibsPrompt
 from diffrhythm.model import DiT, CFM
 from diffrhythm.infer.infer_utils import (
     decode_audio,
@@ -18,6 +18,7 @@ from diffrhythm.infer.infer_utils import (
     get_style_prompt,
     load_checkpoint
 )
+import uuid
 
 
 DIFFRHYTHM_CFG = {
@@ -34,64 +35,9 @@ DIFFRHYTHM_CFG = {
     }
 }
 
-
-def main():
-    parser = argparse.ArgumentParser()
-    parser.add_argument(
-        "--ref-prompt",
-        type=str,
-        help="reference prompt as style prompt for target song",
-        required=False,
-    )
-    parser.add_argument(
-        "--chunked",
-        action="store_true",
-        help="whether to use chunked decoding",
-    )
-    parser.add_argument(
-        "--audio-length",
-        type=int,
-        default=95, # choices=[95, 285],
-        help="length of generated song, upported values are exactly 95 or any value between 96 and 285 (inclusive).",
-    )
-    parser.add_argument(
-        "--output-dir",
-        type=str,
-        default="./output",
-        help="output directory fo generated song",
-    )
-    parser.add_argument(
-        "--batch-infer-num",
-        type=int,
-        default=1,
-        required=False,
-        help="number of songs per batch",
-    )
-    args = parser.parse_args()
-
-    device = "cpu"
-    if torch.cuda.is_available():
-        device = "cuda"
-    elif torch.mps.is_available():
-        device = "mps"
-
-    audio_length = args.audio_length
-    if audio_length == 95:
-        max_frames = 2048
-    elif 95 < audio_length <= 285:
-        max_frames = 6144
-    else:
-        raise ValueError(
-            f"Invalid audio_length: {audio_length}. "
-            "Supported values are exactly 95 or any value between 96 and 285 (inclusive)."
-        )
-
-    cfm, muq, vae = prepare_model(max_frames, device)
-    style_prompt = get_style_prompt(muq, prompt=args.ref_prompt)
-    negative_style_prompt = torch.from_numpy(np.load("diffrhythm/infer/example/vocal.npy")).to(device).half()
-    latent_prompt, pred_frames = get_reference_latent(device, max_frames, False, None, None, vae)
-
+def generate_diffrhythm(ref_prompt, cfm, vae, muq, max_frames, latent_prompt, chunked, batch_infer_num, pred_frames, negative_style_prompt, output_dir,device):
     s_t = time.time()
+    style_prompt = get_style_prompt(muq, prompt=ref_prompt)
     generated_songs = inference(
         cfm_model=cfm,
         vae_model=vae,
@@ -102,8 +48,8 @@ def main():
         negative_style_prompt=negative_style_prompt,
         start_time=torch.tensor([0.0], dtype=torch.float16).to(device),
         pred_frames=pred_frames,
-        chunked=args.chunked,
-        batch_infer_num=args.batch_infer_num,
+        chunked=chunked,
+        batch_infer_num=batch_infer_num,
         song_duration=torch.tensor([1.0], dtype=torch.float16).to(device)
     )
     e_t = time.time() - s_t
@@ -111,7 +57,7 @@ def main():
 
     generated_song = random.sample(generated_songs, 1)[0]
 
-    output_dir = args.output_dir
+    output_dir = output_dir
     os.makedirs(output_dir, exist_ok=True)
 
     output_path = os.path.join(output_dir, "output.wav")
@@ -169,6 +115,98 @@ def inference(
             outputs.append(output)
 
         return outputs
+
+def save_diffrhythm_outputs(prompts, cfm, vae, muq, max_frames, latent_prompt, chunked, batch_infer_num, pred_frames, negative_style_prompt, output_dir,device):
+    run_id = uuid.uuid1()
+    print(f"Saving outputs for run {str(run_id)}")
+    run_path = os.path.join(output_dir, str(run_id))
+    os.mkdir(run_path)
+
+    for i, prompt in enumerate(prompts):
+        write_path = os.path.join(run_path, f"prompt_{i}")
+        os.mkdir(write_path)
+        with open(os.path.join(write_path, "prompt.txt"), "w") as f:
+            f.write(prompt)
+        generate_diffrhythm(prompt, cfm, vae, muq, max_frames, latent_prompt, chunked, batch_infer_num, pred_frames, negative_style_prompt, write_path,device)
+
+def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        "--ref-prompt",
+        type=str,
+        help="reference prompt as style prompt for target song",
+        required=False,
+    )
+    parser.add_argument(
+        "--chunked",
+        action="store_true",
+        help="whether to use chunked decoding",
+    )
+    parser.add_argument(
+        "--audio-length",
+        type=int,
+        default=95, # choices=[95, 285],
+        help="length of generated song, upported values are exactly 95 or any value between 96 and 285 (inclusive).",
+    )
+    parser.add_argument(
+        "--output-dir",
+        type=str,
+        default="./output",
+        help="output directory fo generated song",
+    )
+    parser.add_argument(
+        "--batch-infer-num",
+        type=int,
+        default=1,
+        required=False,
+        help="number of songs per batch",
+    )
+    parser.add_argument(
+        "-v",
+        "--vocab",
+        help="File for vocabulary (for madlibs style prompt)",
+        default="tests/prompt/text_files/parts_of_speech.txt",
+    )
+    parser.add_argument(
+        "-t", "--type", help="Prompt Type (MadLibs, ...)", default="madlibs"
+    )
+
+    parser.add_argument("-n", "--n_prompts", help="Number of Prompts", default="100")
+    args = parser.parse_args()
+
+    device = "cpu"
+    if torch.cuda.is_available():
+        device = "cuda"
+    elif torch.mps.is_available():
+        device = "mps"
+
+    audio_length = args.audio_length
+    if audio_length == 95:
+        max_frames = 2048
+    elif 95 < audio_length <= 285:
+        max_frames = 6144
+    else:
+        raise ValueError(
+            f"Invalid audio_length: {audio_length}. "
+            "Supported values are exactly 95 or any value between 96 and 285 (inclusive)."
+        )
+
+    cfm, muq, vae = prepare_model(max_frames, device)
+    
+    vocab = args.vocab
+    prompt_type = args.type
+    n_prompts = args.n_prompts
+    prompt_gen = None
+    if prompt_type == "madlibs":
+        prompt_gen = MadlibsPrompt(part_of_speech_filename=vocab)
+
+    prompts = prompt_gen.get_prompts(n_prompts=int(n_prompts))
+    negative_style_prompt = torch.from_numpy(np.load("diffrhythm/infer/example/vocal.npy")).to(device).half()
+    latent_prompt, pred_frames = get_reference_latent(device, max_frames, False, None, None, vae)
+    save_diffrhythm_outputs(prompts, cfm, vae, muq, max_frames, latent_prompt, args.chunked, args.batch_infer_num, pred_frames, negative_style_prompt, args.output_dir,device)
+
+
+
 
 
 def prepare_model(max_frames: int, device: str, repo_id: str = "ASLP-lab/DiffRhythm-1_2") -> tuple:

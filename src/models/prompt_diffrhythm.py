@@ -166,18 +166,18 @@ def save_diffrhythm_outputs(
         with open(os.path.join(write_path, "prompt.txt"), "w") as f:
             f.write(prompt)
         generate_diffrhythm(
-            prompt,
-            cfm,
-            vae,
-            muq,
-            max_frames,
-            latent_prompt,
-            chunked,
-            batch_infer_num,
-            pred_frames,
-            negative_style_prompt,
-            write_path,
-            device,
+            ref_prompt=prompt,
+            cfm=cfm,
+            vae=vae,
+            muq=muq,
+            max_frames=max_frames,
+            latent_prompt=latent_prompt,
+            chunked=chunked,
+            batch_infer_num=batch_infer_num,
+            pred_frames=pred_frames,
+            negative_style_prompt=negative_style_prompt,
+            output_dir=write_path,
+            device=device,
         )
 
 
@@ -266,18 +266,18 @@ def main():
         device, max_frames, False, None, None, vae
     )
     save_diffrhythm_outputs(
-        prompts,
-        cfm,
-        vae,
-        muq,
-        max_frames,
-        latent_prompt,
-        args.chunked,
-        args.batch_infer_num,
-        pred_frames,
-        negative_style_prompt,
-        args.output_dir,
-        device,
+        prompts=prompts,
+        cfm=cfm,
+        vae=vae,
+        muq=muq,
+        max_frames=max_frames,
+        latent_prompt=latent_prompt,
+        chunked=args.chunked,
+        batch_infer_num=args.batch_infer_num,
+        pred_frames=pred_frames,
+        negative_style_prompt=negative_style_prompt,
+        output_dir=args.output_dir,
+        device=device,
     )
 
 

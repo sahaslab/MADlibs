@@ -1,0 +1,3 @@
+[submodule "diffrhythm"]
+	path = diffrhythm
+	url = https://github.com/ASLP-lab/DiffRhythm.git

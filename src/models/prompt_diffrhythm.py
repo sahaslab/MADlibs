@@ -9,15 +9,25 @@ import torchaudio
 from huggingface_hub import hf_hub_download
 from einops import rearrange
 from muq import MuQMuLan
+
+current_dir = os.path.dirname(os.path.abspath(__file__))
+project_root = os.path.dirname(os.path.dirname(current_dir))
+diffrhythm_path = os.path.join(project_root, "diffrhythm")
+
+# Add the submodule to Python's searchable paths
+if diffrhythm_path not in sys.path:
+    sys.path.insert(0, diffrhythm_path)
+
+
 from src.prompt.MadlibsPrompt import MadlibsPrompt
 from diffrhythm.model import DiT, CFM
 from diffrhythm.infer.infer_utils import (
     decode_audio,
-    get_negative_style_prompt,
     get_reference_latent,
     get_style_prompt,
-    load_checkpoint
+    load_checkpoint,
 )
+
 import uuid
 
 
@@ -31,11 +41,25 @@ DIFFRHYTHM_CFG = {
         "text_dim": 512,
         "conv_layers": 4,
         "mel_dim": 64,
-        "text_num_embeds": 363
-    }
+        "text_num_embeds": 363,
+    },
 }
 
-def generate_diffrhythm(ref_prompt, cfm, vae, muq, max_frames, latent_prompt, chunked, batch_infer_num, pred_frames, negative_style_prompt, output_dir,device):
+
+def generate_diffrhythm(
+    ref_prompt,
+    cfm,
+    vae,
+    muq,
+    max_frames,
+    latent_prompt,
+    chunked,
+    batch_infer_num,
+    pred_frames,
+    negative_style_prompt,
+    output_dir,
+    device,
+):
     s_t = time.time()
     style_prompt = get_style_prompt(muq, prompt=ref_prompt)
     generated_songs = inference(
@@ -50,7 +74,7 @@ def generate_diffrhythm(ref_prompt, cfm, vae, muq, max_frames, latent_prompt, ch
         pred_frames=pred_frames,
         chunked=chunked,
         batch_infer_num=batch_infer_num,
-        song_duration=torch.tensor([1.0], dtype=torch.float16).to(device)
+        song_duration=torch.tensor([1.0], dtype=torch.float16).to(device),
     )
     e_t = time.time() - s_t
     print(f"inference cost {e_t:.2f} seconds")
@@ -91,7 +115,7 @@ def inference(
             cfg_strength=4.0,
             start_time=start_time,
             latent_pred_segments=pred_frames,
-            batch_infer_num=batch_infer_num
+            batch_infer_num=batch_infer_num,
         )
 
         outputs = []
@@ -116,7 +140,21 @@ def inference(
 
         return outputs
 
-def save_diffrhythm_outputs(prompts, cfm, vae, muq, max_frames, latent_prompt, chunked, batch_infer_num, pred_frames, negative_style_prompt, output_dir,device):
+
+def save_diffrhythm_outputs(
+    prompts,
+    cfm,
+    vae,
+    muq,
+    max_frames,
+    latent_prompt,
+    chunked,
+    batch_infer_num,
+    pred_frames,
+    negative_style_prompt,
+    output_dir,
+    device,
+):
     run_id = uuid.uuid1()
     print(f"Saving outputs for run {str(run_id)}")
     run_path = os.path.join(output_dir, str(run_id))
@@ -127,7 +165,21 @@ def save_diffrhythm_outputs(prompts, cfm, vae, muq, max_frames, latent_prompt, c
         os.mkdir(write_path)
         with open(os.path.join(write_path, "prompt.txt"), "w") as f:
             f.write(prompt)
-        generate_diffrhythm(prompt, cfm, vae, muq, max_frames, latent_prompt, chunked, batch_infer_num, pred_frames, negative_style_prompt, write_path,device)
+        generate_diffrhythm(
+            prompt,
+            cfm,
+            vae,
+            muq,
+            max_frames,
+            latent_prompt,
+            chunked,
+            batch_infer_num,
+            pred_frames,
+            negative_style_prompt,
+            write_path,
+            device,
+        )
+
 
 def main():
     parser = argparse.ArgumentParser()
@@ -145,13 +197,13 @@ def main():
     parser.add_argument(
         "--audio-length",
         type=int,
-        default=95, # choices=[95, 285],
+        default=95,  # choices=[95, 285],
         help="length of generated song, upported values are exactly 95 or any value between 96 and 285 (inclusive).",
     )
     parser.add_argument(
         "--output-dir",
         type=str,
-        default="./output",
+        default="outputs",
         help="output directory fo generated song",
     )
     parser.add_argument(
@@ -191,8 +243,12 @@ def main():
             "Supported values are exactly 95 or any value between 96 and 285 (inclusive)."
         )
 
-    cfm, muq, vae = prepare_model(max_frames, device)
-    
+    cfm, muq, vae = prepare_model(
+        max_frames,
+        device,
+        cache_dir="/dartfs/rc/home/t/f00814t/lab/noah/imPROMPTu/checkpoints/pretrained",
+    )
+
     vocab = args.vocab
     prompt_type = args.type
     n_prompts = args.n_prompts
@@ -201,15 +257,36 @@ def main():
         prompt_gen = MadlibsPrompt(part_of_speech_filename=vocab)
 
     prompts = prompt_gen.get_prompts(n_prompts=int(n_prompts))
-    negative_style_prompt = torch.from_numpy(np.load("diffrhythm/infer/example/vocal.npy")).to(device).half()
-    latent_prompt, pred_frames = get_reference_latent(device, max_frames, False, None, None, vae)
-    save_diffrhythm_outputs(prompts, cfm, vae, muq, max_frames, latent_prompt, args.chunked, args.batch_infer_num, pred_frames, negative_style_prompt, args.output_dir,device)
+    negative_style_prompt = (
+        torch.from_numpy(np.load("diffrhythm/infer/example/vocal.npy"))
+        .to(device)
+        .half()
+    )
+    latent_prompt, pred_frames = get_reference_latent(
+        device, max_frames, False, None, None, vae
+    )
+    save_diffrhythm_outputs(
+        prompts,
+        cfm,
+        vae,
+        muq,
+        max_frames,
+        latent_prompt,
+        args.chunked,
+        args.batch_infer_num,
+        pred_frames,
+        negative_style_prompt,
+        args.output_dir,
+        device,
+    )
 
 
-
-
-
-def prepare_model(max_frames: int, device: str, repo_id: str = "ASLP-lab/DiffRhythm-1_2") -> tuple:
+def prepare_model(
+    max_frames: int,
+    device: str,
+    repo_id: str = "ASLP-lab/DiffRhythm-1_2",
+    cache_dir: str = "./pretrained",
+) -> tuple:
     # prepare cfm model
     if max_frames == 2048:
         repo_id = "ASLP-lab/DiffRhythm-1_2"
@@ -217,13 +294,13 @@ def prepare_model(max_frames: int, device: str, repo_id: str = "ASLP-lab/DiffRhy
         repo_id = "ASLP-lab/DiffRhythm-1_2-full"
 
     dit_ckpt_path = hf_hub_download(
-        repo_id=repo_id, filename="cfm_model.pt", cache_dir="./pretrained"
+        repo_id=repo_id, filename="cfm_model.pt", cache_dir=cache_dir
     )
 
     cfm = CFM(
         transformer=DiT(**DIFFRHYTHM_CFG["model"], max_frames=max_frames),
         num_channels=DIFFRHYTHM_CFG["model"]["mel_dim"],
-        max_frames=max_frames
+        max_frames=max_frames,
     )
     cfm = cfm.to(device)
     cfm = load_checkpoint(cfm, dit_ckpt_path, device=device, use_ema=False)
@@ -234,8 +311,7 @@ def prepare_model(max_frames: int, device: str, repo_id: str = "ASLP-lab/DiffRhy
 
     # prepare vae
     vae_ckpt_path = hf_hub_download(
-        repo_id="ASLP-lab/DiffRhythm-vae",
-        filename="vae_model.pt"
+        repo_id="ASLP-lab/DiffRhythm-vae", filename="vae_model.pt"
     )
     vae = torch.jit.load(vae_ckpt_path, map_location="cpu").to(device)
 

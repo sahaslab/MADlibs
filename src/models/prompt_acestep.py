@@ -3,7 +3,7 @@ from acestep.llm_inference import LLMHandler
 from acestep.inference import GenerationParams, GenerationConfig, generate_music
 import torch
 import json
-from src.prompt.MadlibsPrompt import MadlibsPrompt
+from prompt.MadlibsPrompt import MadlibsPrompt
 import os
 import uuid
 import argparse

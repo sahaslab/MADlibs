@@ -1,0 +1,11 @@
+pipeline:
+  _target_: madlibs.mir.pipeline.MIRPipeline
+  beat_tracker:
+    _target_: madlibs.mir.beat_tracker.BeatThisTracker
+    checkpoint_path: final0
+    dbn: false
+  audio_analyses:
+    - _target_: madlibs.mir.rms.RMSStd
+    - _target_: madlibs.mir.chroma.ChromagramSum
+  beat_analyses:
+    - _target_: madlibs.mir.tempo.Tempo

@@ -1,9 +1,11 @@
-from src.mir.Tempo import Tempo
-
+import sys
+import os
+sys.path.append(os.path.join(os.path.dirname(__file__), "../.."))
 import pytest
 import librosa
 import torch
 from beat_this.inference import File2Beats
+from madlibs.mir.tempo import Tempo
 
 
 def test_tempo_on_ace_step():

@@ -1,10 +1,9 @@
-from src.mir.IMir import IMir
-
 import numpy as np
 import librosa
+from madlibs.mir.base import MIRAnalysis
 
 
-class ChromagramSum(IMir):
+class ChromagramSum(MIRAnalysis):
     def process_audio(self, data: np.ndarray) -> dict[str, np.ndarray]:
         """
         Analyze pitch by calculating chromagram, summing over time, and normalizing

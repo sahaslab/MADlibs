@@ -1,0 +1,17 @@
+_target_: madlibs.prompt.madlibs.MadlibsPrompt
+part_of_speech_filename: ${hydra:runtime.cwd}/data/parts_of_speech.txt
+prompt_starts:
+  - "Please give me a song where "
+  - "Song that "
+  - "Write me a song where "
+templates:
+  - "{article} {adj} {noun} {verb}s."
+  - "{article} {noun} {adv} {verb}s."
+  - "{pronoun} {verb}s {adv}."
+  - "{article} {noun} and {article2} {noun2} {verb}."
+  - "{article} {noun} {verb}s when {pronoun} {verb2}s."
+  - "{article} {adj} {noun} {adv} {verb}s."
+  - "{pronoun} {adv} {verb}s {article} {noun}."
+  - "{article} {noun} {verb}s {conjunction} {pronoun} {verb2}s."
+  - "{article} {noun} {verb}s {relative_adv} {article2} {noun2} {verb2}s."
+  - "{pronoun} {verb}s {article} {adj} {noun}."

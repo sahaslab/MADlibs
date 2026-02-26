@@ -1,0 +1,29 @@
+defaults:
+  - _base
+
+_target_: madlibs.generation.acestep.ACEStep
+checkpoint_dir: ${hydra:runtime.cwd}/pretrained/ace-step
+config_path: acestep-v15-turbo
+lm_model_path: acestep-5Hz-lm-1.7B
+llm_backend: vllm
+init_llm: true
+compile_model: false
+offload_to_cpu: false
+offload_dit_to_cpu: false
+params:
+  lyrics: "[Instrumental]"
+  instrumental: true
+  duration: 60
+  inference_steps: 8
+  guidance_scale: 7
+  seed: -1
+  thinking: false
+  use_cot_metas: false
+  use_cot_caption: false
+  use_cot_language: false
+generation_config:
+  batch_size: 1
+  audio_format: wav
+  use_random_seed: true
+  seeds: null
+  lm_batch_chunk_size: 8

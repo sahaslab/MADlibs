@@ -1,12 +1,21 @@
-import librosa
-from src.mir.Pipeline import process
+import sys
+import os
+sys.path.append(os.path.join(os.path.dirname(__file__), "../.."))
+from madlibs.mir.beat_tracker import BeatThisTracker
+from madlibs.mir.chroma import ChromagramSum
+from madlibs.mir.pipeline import MIRPipeline
+from madlibs.mir.rms import RMSStd
+from madlibs.mir.tempo import Tempo
 
 
 def test_pipeline():
-    # Simple test that pipeline executes without error
-    output = process(audio_filename="tests/mir/ace_step_test.wav")
+    pipeline = MIRPipeline(
+        beat_tracker=BeatThisTracker(checkpoint_path="final0", dbn=False),
+        audio_analyses=[RMSStd(), ChromagramSum()],
+        beat_analyses=[Tempo()],
+    )
+    output = pipeline.process(audio_filename="tests/mir/ace_step_test.wav")
     assert output["metadata"]["audio_filename"] == "tests/mir/ace_step_test.wav"
-    # Test that all the measures are in the keys
     assert "rmsstd" in output
     assert "chromasum" in output
     assert "tempo" in output

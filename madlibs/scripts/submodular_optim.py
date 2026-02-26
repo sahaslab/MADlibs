@@ -1,4 +1,4 @@
-from prompt.MadlibsPrompt import MadlibsPrompt
+from madlibs.prompt.madlibs import MadlibsPrompt
 import torch
 import laion_clap
 from apricot import SaturatedCoverageSelection

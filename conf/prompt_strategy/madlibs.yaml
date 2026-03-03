@@ -1,9 +1,84 @@
+# Strategy class to instantiate
 _target_: madlibs.prompt.madlibs.MadlibsPrompt
+# Path to POS lexicon used for slot filling
 part_of_speech_filename: ${hydra:runtime.cwd}/data/parts_of_speech.txt
+# Source caption corpus used for template/grammar induction
+caption_corpus_filename: ${hydra:runtime.cwd}/data/song_describer.csv
+# Zero-based column index containing caption text
+caption_column: 2
+# Whether the caption file has a header row
+caption_has_header: true
+# Optional column used to filter rows
+caption_filter_column: 3
+# Required value in filter column for row inclusion
+caption_filter_value: "True"
+# Structural mode: none | templates | pcfg
+induction_method: none
+# Template induction style: keeps literals unless replaced by slots
+induced_template_style: hybrid_literals
+# If true, discard hand-written templates and keep only induced ones
+replace_templates_with_induced: true
+# Minimum placeholders required for an induced template
+min_template_placeholders: 3
+# Minimum token length for induced templates
+min_template_tokens: 5
+# Maximum token length for induced templates
+max_template_tokens: 12
+# Cap on number of induced templates retained
+max_induced_templates: 500
+# If true, fallback to NLTK tagger for words not in lexicon
+use_nltk_pos_tagger: false
+# If true, sample slot words from template-specific word distributions
+use_template_field_lexicon: true
+# Minimum field-word count before retaining that word in template-specific vocab
+template_field_vocab_min_count: 2
+# POS categories treated as replaceable slots
+slot_pos:
+  - adj
+  - noun
+  - verb
+  - adv
+# Regex for validating candidate slot words
+slot_word_pattern: "^[a-z][a-z\\-']+$"
+# Minimum character length for slot words
+min_slot_word_length: 2
+# Maximum character length for slot words
+max_slot_word_length: 20
+# Manual mapping for numbered template fields to base POS category
+field_to_pos:
+  article2: article
+  noun2: noun
+  verb2: verb
+# NLTK POS tag to internal category mapping (used when tagger is enabled)
+pos_tag_to_pos:
+  NN: noun
+  NNS: noun
+  NNP: noun
+  NNPS: noun
+  VB: verb
+  VBD: verb
+  VBG: verb
+  VBN: verb
+  VBP: verb
+  VBZ: verb
+  JJ: adj
+  JJR: adj
+  JJS: adj
+  RB: adv
+  RBR: adv
+  RBS: adv
+  WRB: relative_adv
+  DT: article
+  PRP: pronoun
+  PRP$: pronoun
+  WP: pronoun
+  WP$: pronoun
+  CC: conjunction
+  IN: conjunction
+# Prefix options prepended to every generated prompt body
 prompt_starts:
-  - "Please give me a song where "
-  - "Song that "
-  - "Write me a song where "
+  - "Generate a song matching this description: "
+# Hand-authored fallback templates (and primary templates when induction_method=none)
 templates:
   - "{article} {adj} {noun} {verb}s."
   - "{article} {noun} {adv} {verb}s."

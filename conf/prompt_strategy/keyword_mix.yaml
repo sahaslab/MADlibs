@@ -1,5 +1,11 @@
 _target_: madlibs.prompt.keyword_mix.KeywordMixPromptStrategy
+
+# Random seed
 seed: 0
+
+# Candidate musical styles
 styles: [ambient, synthwave, lo-fi hip hop, orchestral]
+# Candidate mood descriptors
 moods: [dreamy, uplifting, melancholic, tense]
+# Candidate instrument descriptors
 instruments: [piano, strings, analog synth, acoustic guitar]

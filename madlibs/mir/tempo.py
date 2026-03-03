@@ -1,4 +1,3 @@
-import numpy as np
 from madlibs.mir.base import MIRAnalysis
 
 

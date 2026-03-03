@@ -6,6 +6,8 @@ class TimeSignature(MIRAnalysis):
         """
         Time signature is hard to do, we can do a best effort by taking the median count of beats between each downbeat (+ 1)
 
+        NOTE: this is the numerator for time signature
+        
         Args:
             - data: tuple of (beats, downbeats) arrays
         Return:

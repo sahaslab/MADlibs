@@ -22,7 +22,6 @@ def test_tempo_on_ace_step():
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     file2beats = File2Beats(checkpoint_path="final0", device=device, dbn=False)
     beats, downbeats = file2beats("tests/mir/ace_step_test.wav")
-
     output = t.process_audio(data=(beats, downbeats))
     assert list(output.keys())[0] == "tempo" and len(output.keys()) == 1
     assert output["tempo"] == pytest.approx(60, rel=1e-2)

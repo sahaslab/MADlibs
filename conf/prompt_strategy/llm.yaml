@@ -1,0 +1,7 @@
+_target_: madlibs.prompt.llm.LLMPromptStrategy
+model_id: gemini/gemini-3-flash-preview
+system_instruction: "Generate one brief music generation prompt, returning only the prompt text itself."
+user_seed_text: "Create a detailed prompt for instrumental music generation."
+max_new_tokens: 256
+temperature: 1.0
+num_workers: 16

@@ -1,8 +1,10 @@
-from src.mir.ChromagramSum import ChromagramSum
-
+import sys
+import os
+sys.path.append(os.path.join(os.path.dirname(__file__), "../.."))
 import librosa
 import pytest
 import numpy as np
+from madlibs.mir.chroma import ChromagramSum
 
 
 def test_chromagram_sum():

@@ -1,0 +1,31 @@
+defaults:
+  - _base
+
+_target_: madlibs.generation.diffrhythm.DiffRhythm
+checkpoint_dir: ${hydra:runtime.cwd}/pretrained/diffrhythm
+audio_length: 95
+repo_id_short: ASLP-lab/DiffRhythm-1_2
+repo_id_full: ASLP-lab/DiffRhythm-1_2-full
+cfm_filename: cfm_model.pt
+vae_repo_id: ASLP-lab/DiffRhythm-vae
+vae_filename: vae_model.pt
+muq_model_id: OpenMuQ/MuQ-MuLan-large
+negative_style_prompt_path: ${hydra:runtime.cwd}/diffrhythm/infer/example/vocal.npy
+model:
+  dim: 2048
+  depth: 16
+  heads: 32
+  ff_mult: 4
+  text_dim: 512
+  conv_layers: 4
+  mel_dim: 64
+  text_num_embeds: 363
+sampling:
+  chunked: false
+  batch_infer_num: 1
+  steps: 32
+  cfg_strength: 4.0
+  start_time: 0.0
+  song_duration: 1.0
+  audio_format: wav
+  random_select_batch_output: true

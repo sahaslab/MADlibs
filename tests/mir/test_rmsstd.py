@@ -1,12 +1,14 @@
-from src.mir.RMSStd import RMSStd
-
+import sys
+import os
+sys.path.append(os.path.join(os.path.dirname(__file__), "../.."))
 import pytest
 import librosa
+from madlibs.mir.rms import RMSStd
 
 
 def test_rmsstd_on_ace_step():
     rms = RMSStd()
-    audio, sr = librosa.load("tests/mir/ace_step_test.wav")
+    audio, _ = librosa.load("tests/mir/ace_step_test.wav")
     output = rms.process_audio(data=audio)
     assert list(output.keys())[0] == "rmsstd" and len(output.keys()) == 1
     assert output["rmsstd"] == pytest.approx(0.07127465, rel=1e-3)

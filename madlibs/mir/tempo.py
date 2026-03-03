@@ -1,9 +1,8 @@
-from src.mir.IMir import IMir
-
 import numpy as np
+from madlibs.mir.base import MIRAnalysis
 
 
-class Tempo(IMir):
+class Tempo(MIRAnalysis):
     def process_audio(self, data) -> dict[str, float]:
         """
         Tempo is kind of arbitrary. Calculate how many downbeats happen in a minute.
@@ -23,7 +22,7 @@ class Tempo(IMir):
         framewise_dbpm = []
         for i in range(len(downbeats) - 1):
             downbeat_delta = downbeats[i + 1] - downbeats[i]
-            dbpm = 60 / downbeat_delta
+            dbpm = 60 / (downbeat_delta + 1e-8)
             framewise_dbpm.append(dbpm)
 
         # Return mean

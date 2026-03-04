@@ -14,10 +14,14 @@ def main(cfg: DictConfig):
 
     generator = instantiate(cfg.generator)
     if not isinstance(generator, MusicGenerator):
-        raise TypeError(f"generator must instantiate MusicGenerator, got: {type(generator)}")
+        raise TypeError(
+            f"generator must instantiate MusicGenerator, got: {type(generator)}"
+        )
 
     os.makedirs(cfg.run.generated_audio_dir, exist_ok=True)
-    run_dir = generator.generate(prompts=prompts, output_dir=cfg.run.generated_audio_dir)
+    run_dir = generator.generate(
+        prompts=prompts, output_dir=cfg.run.generated_audio_dir
+    )
     print(f"Generated {len(prompts)} outputs in {run_dir}")
 
 

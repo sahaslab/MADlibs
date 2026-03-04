@@ -20,8 +20,6 @@ class BeatThisTracker:
         if self._tracker is None:
             device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
             self._tracker = File2Beats(
-                checkpoint_path=self.checkpoint_path,
-                device=device,
-                dbn=self.dbn
+                checkpoint_path=self.checkpoint_path, device=device, dbn=self.dbn
             )
         return self._tracker(audio_filename)

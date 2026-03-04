@@ -103,7 +103,9 @@ class ACEStep(MusicGenerator):
             save_dir=save_path,
         )
         if not result.success:
-            raise RuntimeError(f"ACE-Step generation failed: {result.error or result.status_message}")
+            raise RuntimeError(
+                f"ACE-Step generation failed: {result.error or result.status_message}"
+            )
 
         if result.audios and result.audios[0].get("path"):
             return str(result.audios[0]["path"])
@@ -123,7 +125,9 @@ class ACEStep(MusicGenerator):
             offload_dit_to_cpu=self.offload_dit_to_cpu,
         )
         if not success:
-            raise RuntimeError(f"Failed to initialize ACE-Step DiT service: {status_msg}")
+            raise RuntimeError(
+                f"Failed to initialize ACE-Step DiT service: {status_msg}"
+            )
         self._dit_handler = dit_handler
 
         if not self.init_llm:
@@ -141,5 +145,7 @@ class ACEStep(MusicGenerator):
             dtype=None,
         )
         if not lm_success:
-            raise RuntimeError(f"Failed to initialize ACE-Step LLM service: {lm_status}")
+            raise RuntimeError(
+                f"Failed to initialize ACE-Step LLM service: {lm_status}"
+            )
         self._llm_handler = llm_handler

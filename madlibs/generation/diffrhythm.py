@@ -147,16 +147,16 @@ class DiffRhythm(MusicGenerator):
                 batch_infer_num=self.sampling.batch_infer_num,
             )
 
-        outputs = []
-        for latent in latents:
-            latent = latent.to(torch.float32).transpose(1, 2)
-            output = decode_audio(latent, self._vae, chunked=self.sampling.chunked)
-            output = rearrange(output, "b d n -> d (b n)").to(torch.float32)
-            peak = torch.max(torch.abs(output))
-            if peak > 0:
-                output = output.div(peak)
-            output = output.clamp(-1, 1).mul(32767).to(torch.int16).cpu()
-            outputs.append(output)
+            outputs = []
+            for latent in latents:
+                latent = latent.to(torch.float32).transpose(1, 2)
+                output = decode_audio(latent, self._vae, chunked=self.sampling.chunked)
+                output = rearrange(output, "b d n -> d (b n)").to(torch.float32)
+                peak = torch.max(torch.abs(output))
+                if peak > 0:
+                    output = output.div(peak)
+                output = output.clamp(-1, 1).mul(32767).to(torch.int16).cpu()
+                outputs.append(output)
 
         selected = outputs[0]
         if self.sampling.random_select_batch_output and len(outputs) > 1:

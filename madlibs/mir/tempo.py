@@ -22,7 +22,7 @@ class Tempo(MIRAnalysis):
         framewise_dbpm = []
         for i in range(len(downbeats) - 1):
             downbeat_delta = downbeats[i + 1] - downbeats[i]
-            dbpm = 60 / downbeat_delta
+            dbpm = 60 / (downbeat_delta + 1e-8)
             framewise_dbpm.append(dbpm)
 
         # Return mean

@@ -9,5 +9,7 @@ def generate_model_outputs(
 ) -> str:
     generator = instantiate(generator_cfg)
     if not isinstance(generator, MusicGenerator):
-        raise TypeError(f"Hydra config must instantiate MusicGenerator, got: {type(generator)}")
+        raise TypeError(
+            f"Hydra config must instantiate MusicGenerator, got: {type(generator)}"
+        )
     return generator.generate(prompts=prompts, output_dir=output_dir)

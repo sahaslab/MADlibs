@@ -46,7 +46,7 @@ class MadlibsPrompt(PromptStrategy):
                 adj=random.choice(self.words["adj"]),
                 relative_adv=random.choice(self.words["relative_adv"]),
                 pronoun=random.choice(self.words["pronoun"]),
-                conjunction=random.choice(self.words["conjunction"])
+                conjunction=random.choice(self.words["conjunction"]),
             )
             prompts.append(prompt)
 

@@ -19,7 +19,6 @@ if __name__ == "__main__":
         pipeline.process("tests/mir/diffrhythm_test.wav"),
     ]
     rmsstd = [output["rmsstd"] for output in outputs]
-
     plt.figure()
     plt.hist(rmsstd, bins=30, density=True)
     plt.xlabel("RMS Std")

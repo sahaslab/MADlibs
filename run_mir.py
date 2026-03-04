@@ -34,7 +34,10 @@ def main(cfg: DictConfig):
                 logger.error(f"Error processing {audio_path}: {error}")
                 continue
 
-            serializable = {key: value.tolist() if hasattr(value, "tolist") else value for key, value in result.items()}
+            serializable = {
+                key: value.tolist() if hasattr(value, "tolist") else value
+                for key, value in result.items()
+            }
             file_obj.write(json.dumps(serializable) + "\n")
     print(f"Wrote MIR results for {len(audio_paths)} files to {output_path}")
 

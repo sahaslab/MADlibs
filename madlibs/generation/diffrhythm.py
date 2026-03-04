@@ -1,12 +1,7 @@
 import sys
 import os
-sys.path.append(
-    os.path.join(
-        os.path.dirname(__file__),
-        "../..",
-        "diffrhythm"
-    )
-)
+
+sys.path.append(os.path.join(os.path.dirname(__file__), "../..", "diffrhythm"))
 import dataclasses
 import random
 import numpy as np
@@ -19,7 +14,7 @@ from diffrhythm.infer.infer_utils import (
     decode_audio,
     get_reference_latent,
     get_style_prompt,
-    load_checkpoint
+    load_checkpoint,
 )
 from diffrhythm.model import CFM, DiT
 from madlibs.generation.base import MusicGenerator
@@ -66,7 +61,7 @@ class DiffRhythm(MusicGenerator):
         sampling: dict[str, Any] | DiffRhythmSamplingConfig | None = None,
         num_workers: int = 1,
         device: str = "cuda",
-        **base_kwargs: Any
+        **base_kwargs: Any,
     ):
         super().__init__(num_workers=num_workers, device=device, **base_kwargs)
         self.checkpoint_dir = checkpoint_dir
@@ -115,7 +110,7 @@ class DiffRhythm(MusicGenerator):
             "negative_style_prompt_path": self.negative_style_prompt_path,
             "model": dataclasses.asdict(self.model),
             "sampling": dataclasses.asdict(self.sampling),
-            **self._base_init_kwargs()
+            **self._base_init_kwargs(),
         }
 
     def _generate_audio(self, prompt: str, save_path: str) -> str:
@@ -129,8 +124,12 @@ class DiffRhythm(MusicGenerator):
 
         style_prompt = get_style_prompt(self._muq, prompt=prompt)
         text = torch.zeros((1, self.max_frames), dtype=torch.long, device=self.device)
-        start_time = torch.tensor([self.sampling.start_time], dtype=torch.float16, device=self.device)
-        song_duration = torch.tensor([self.sampling.song_duration], dtype=torch.float16, device=self.device)
+        start_time = torch.tensor(
+            [self.sampling.start_time], dtype=torch.float16, device=self.device
+        )
+        song_duration = torch.tensor(
+            [self.sampling.song_duration], dtype=torch.float16, device=self.device
+        )
 
         with torch.inference_mode():
             latents, _ = self._cfm.sample(
@@ -145,7 +144,7 @@ class DiffRhythm(MusicGenerator):
                 cfg_strength=self.sampling.cfg_strength,
                 start_time=start_time,
                 latent_pred_segments=self._pred_frames,
-                batch_infer_num=self.sampling.batch_infer_num
+                batch_infer_num=self.sampling.batch_infer_num,
             )
 
         outputs = []
@@ -173,36 +172,37 @@ class DiffRhythm(MusicGenerator):
 
         repo_id = self.repo_id_short if self.max_frames == 2048 else self.repo_id_full
         cfm_ckpt_path = hf_hub_download(
-            repo_id=repo_id,
-            filename=self.cfm_filename,
-            cache_dir=self.checkpoint_dir
+            repo_id=repo_id, filename=self.cfm_filename, cache_dir=self.checkpoint_dir
         )
 
         cfm = CFM(
-            transformer=DiT(**dataclasses.asdict(self.model), max_frames=self.max_frames),
+            transformer=DiT(
+                **dataclasses.asdict(self.model), max_frames=self.max_frames
+            ),
             num_channels=self.model.mel_dim,
             max_frames=self.max_frames,
         ).to(self.device)
-        self._cfm = load_checkpoint(cfm, cfm_ckpt_path, device=str(self.device), use_ema=False)
+        self._cfm = load_checkpoint(
+            cfm, cfm_ckpt_path, device=str(self.device), use_ema=False
+        )
 
         self._muq = MuQMuLan.from_pretrained(self.muq_model_id).to(self.device).eval()
 
         vae_ckpt_path = hf_hub_download(
             repo_id=self.vae_repo_id,
             filename=self.vae_filename,
-            cache_dir=self.checkpoint_dir
+            cache_dir=self.checkpoint_dir,
         )
         self._vae = torch.jit.load(vae_ckpt_path, map_location="cpu").to(self.device)
 
-        self._negative_style_prompt = torch.from_numpy(np.load(self.negative_style_prompt_path)).to(self.device).half()
+        self._negative_style_prompt = (
+            torch.from_numpy(np.load(self.negative_style_prompt_path))
+            .to(self.device)
+            .half()
+        )
 
         self._latent_prompt, self._pred_frames = get_reference_latent(
-            str(self.device),
-            self.max_frames,
-            False,
-            None,
-            None,
-            self._vae
+            str(self.device), self.max_frames, False, None, None, self._vae
         )
 
     def _resolve_max_frames(self, audio_length: int) -> int:
@@ -215,7 +215,9 @@ class DiffRhythm(MusicGenerator):
             "Supported values are exactly 95 or any value between 96 and 285 (inclusive)."
         )
 
-    def _estimate_worker_vram_bytes(self, probe_prompt: str | None = None) -> int | None:
+    def _estimate_worker_vram_bytes(
+        self, probe_prompt: str | None = None
+    ) -> int | None:
         if self.device.type != "cuda":
             return None
         if probe_prompt:
@@ -239,7 +241,11 @@ class DiffRhythm(MusicGenerator):
         )
 
         # JIT modules expose parameters/buffers via iterators too.
-        param_bytes += sum(param.numel() * param.element_size() for param in self._vae.parameters())
-        buffer_bytes += sum(buffer.numel() * buffer.element_size() for buffer in self._vae.buffers())
+        param_bytes += sum(
+            param.numel() * param.element_size() for param in self._vae.parameters()
+        )
+        buffer_bytes += sum(
+            buffer.numel() * buffer.element_size() for buffer in self._vae.buffers()
+        )
 
         return param_bytes + buffer_bytes

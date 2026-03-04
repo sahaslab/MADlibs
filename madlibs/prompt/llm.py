@@ -22,7 +22,7 @@ class LLMPromptStrategy(PromptStrategy):
     def _generate_one(self, idx: int, seed: int | None) -> str:
         messages = [
             {"content": self.system_instruction, "role": "system"},
-            {"content": self.user_seed_text, "role": "user"}
+            {"content": self.user_seed_text, "role": "user"},
         ]
         response = litellm.completion(
             model=self.model_id,
@@ -30,7 +30,7 @@ class LLMPromptStrategy(PromptStrategy):
             max_new_tokens=self.max_new_tokens,
             temperature=self.temperature,
             response_format=PromptOutput,
-            seed=seed + idx if seed is not None else None
+            seed=seed + idx if seed is not None else None,
         )
         response = response["choices"][0]["message"]["content"].strip()
         summary_obj = PromptOutput.model_validate_json(response)
@@ -41,7 +41,7 @@ class LLMPromptStrategy(PromptStrategy):
             return []
 
         max_workers = max(1, min(self.num_workers, n_prompts))
-        prompts = [""] * n_prompts # Default to empty string
+        prompts = [""] * n_prompts  # Default to empty string
 
         with ThreadPoolExecutor(max_workers=max_workers) as executor:
             future_to_idx = {
@@ -49,9 +49,7 @@ class LLMPromptStrategy(PromptStrategy):
                 for idx in range(n_prompts)
             }
             for future in tqdm(
-                as_completed(future_to_idx),
-                total=n_prompts,
-                desc="Generating prompts"
+                as_completed(future_to_idx), total=n_prompts, desc="Generating prompts"
             ):
                 idx = future_to_idx[future]
                 prompts[idx] = future.result()

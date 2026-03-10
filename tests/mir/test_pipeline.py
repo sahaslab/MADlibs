@@ -1,5 +1,6 @@
 import sys
 import os
+
 sys.path.append(os.path.join(os.path.dirname(__file__), "../.."))
 from madlibs.mir.beat_tracker import BeatThisTracker
 from madlibs.mir.chroma import ChromagramSum
@@ -9,10 +10,16 @@ from madlibs.mir.tempo import Tempo
 
 
 def test_pipeline():
+    class InstrumentTaggerStub:
+        def tag(self, audio_filename):
+            pass
+
     pipeline = MIRPipeline(
         beat_tracker=BeatThisTracker(checkpoint_path="final0", dbn=False),
         audio_analyses=[RMSStd(), ChromagramSum()],
         beat_analyses=[Tempo()],
+        instrument_analyses=[],
+        instrument_tagger=InstrumentTaggerStub(),
     )
     output = pipeline.process(audio_filename="tests/mir/ace_step_test.wav")
     assert output["metadata"]["audio_filename"] == "tests/mir/ace_step_test.wav"

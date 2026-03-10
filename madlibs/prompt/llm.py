@@ -99,7 +99,7 @@ class LLMPromptStrategy(CorpusPromptStrategy):
     def generate_one_seed_prompt(self) -> str:
         messages = [
             {"content": self.system_instruction, "role": "system"},
-            {"content": self.user_seed_text, "role": "user"}
+            {"content": self.user_seed_text, "role": "user"},
         ]
 
         response = litellm.completion(

@@ -4,8 +4,9 @@ from madlibs.mir.base import MIRAnalysis
 
 
 class RMSStd(MIRAnalysis):
-    def process_audio(self, data: np.ndarray) -> dict[str, float]:
+    def process_audio(self, data: tuple[np.ndarray, float]) -> dict[str, float]:
         # Calculate RMS for default librosa frames
-        rms = librosa.feature.rms(y=data)
+        audio, _ = data
+        rms = librosa.feature.rms(y=audio)
         std = np.std(rms)
         return {"rmsstd": std}

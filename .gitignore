@@ -7,6 +7,8 @@ results/
 # ignore wav files
 *.wav
 
+*instruments.png
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[codz]

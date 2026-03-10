@@ -4,7 +4,6 @@ import laion_clap
 from apricot import SaturatedCoverageSelection
 from sklearn.metrics.pairwise import cosine_similarity
 import numpy as np
-import numpy as np
 import matplotlib.pyplot as plt
 import time
 

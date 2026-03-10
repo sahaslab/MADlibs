@@ -1,0 +1,26 @@
+# Import the base strategy config into `base_strategy`.
+defaults:
+  - /prompt_strategy@base_strategy: dependency_graph
+  - _self_
+
+# Strategy class to instantiate.
+_target_: madlibs.prompt.ranked.RankedPromptStrategy
+# Random seed used by ranking layer.
+seed: 0
+# Number of generated candidates per requested final prompt.
+candidate_multiplier: 6
+# N-gram order for ranking language model.
+lm_order: 3
+# Minimum token length required before a candidate is scored.
+min_candidate_tokens: 4
+# Weight for in-domain LM fluency term.
+score_weight_lm: 1.0
+# Weight for lexical diversity term.
+score_weight_diversity: 0.8
+# Weight for repetition penalty term.
+score_weight_repetition_penalty: 1.0
+# Similarity ceiling between selected prompts (higher allows more near-duplicates).
+max_jaccard_similarity: 0.9
+
+# No overrides required; base strategy comes fully from `dependency_graph` config.
+base_strategy: {}

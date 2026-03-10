@@ -1,2 +1,4 @@
 _target_: madlibs.prompt.blank.BlankPromptStrategy
+
+# Literal prompt text repeated for every requested output
 blank_prompt: ""

@@ -39,7 +39,6 @@ class InstrumentTagger:
                             If no instruments are detected, output none."""
 
     def tag(self, audio_path: str) -> List[str]:
-
         conversation = [
             {
                 "role": "user",

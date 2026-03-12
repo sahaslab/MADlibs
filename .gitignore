@@ -1,6 +1,7 @@
 # Repo-specific
 pretrained/
 results/
+multirun/
 .hydra/
 .vscode/
 

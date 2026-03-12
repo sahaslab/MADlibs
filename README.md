@@ -106,6 +106,12 @@ Command:
 3. Run analysis:
 `python run_mir.py analysis=full_pipeline`
 
+### Lyria
+Lyria can be run with:
+`python run_generation.py generator=lyria`
+
+This generator uses the Google `google-genai` realtime music session under the hood and saves fixed-length `.wav` files for each prompt. Set either `GOOGLE_API_KEY` or `GEMINI_API_KEY` before running.
+
 ## Formatting
 Please format code contributions by running `ruff format`.
 

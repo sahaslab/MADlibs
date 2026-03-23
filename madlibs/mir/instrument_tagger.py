@@ -2,9 +2,10 @@ import torch
 from transformers import AudioFlamingo3ForConditionalGeneration, AutoProcessor
 from typing import List
 import ast
+from madlibs.mir.base import MIRAnalysis
 
 
-class InstrumentTagger:
+class InstrumentTagger(MIRAnalysis):
     def __init__(
         self,
         model_id: str = "nvidia/music-flamingo-hf",
@@ -38,7 +39,7 @@ class InstrumentTagger:
                             Remove duplicates.
                             If no instruments are detected, output none."""
 
-    def tag(self, audio_path: str) -> List[str]:
+    def process_audio(self, audio_path: str) -> List[str]:
 
         conversation = [
             {

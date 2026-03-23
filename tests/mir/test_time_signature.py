@@ -1,11 +1,12 @@
 import sys
 import os
+
 sys.path.append(os.path.join(os.path.dirname(__file__), "../.."))
 import pytest
 import librosa
 import torch
 from beat_this.inference import File2Beats
-from madlibs.mir.time_signature import TimeSignature
+from madlibs.mir.time_signature import CLAPSimilarity
 
 
 def test_time_signature():
@@ -18,6 +19,7 @@ def test_time_signature():
     output = t.process_audio(data)
     assert "time_signature" in output
     assert output["time_signature"] == 4
+
 
 def test_time_signature_on_ace_step():
     t = TimeSignature()

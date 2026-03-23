@@ -8,6 +8,10 @@ logger = logging.getLogger(__name__)
 
 @dataclasses.dataclass
 class BlankPromptStrategy(PromptStrategy):
+    """
+    Simple prompt strategy that generates blank prompts (pseudo-unconditional sampling strategy)
+    """
+
     blank_prompt: str = ""
 
     def get_prompts(self, n_prompts: int, seed: int | None = None) -> list[str]:

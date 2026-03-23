@@ -1,0 +1,28 @@
+defaults:
+  - _base
+
+_target_: madlibs.generation.lyria.Lyria
+model_id: models/lyria-realtime-exp
+api_version: v1alpha
+api_key: null
+output_seconds: 30.0
+receive_timeout_seconds: 120.0
+prompt_weight: 1.0
+sample_rate: 48000
+channels: 2
+sample_width_bytes: 2
+audio_format: wav
+device: cpu
+config:
+  temperature: 1.1
+  top_k: 40
+  seed: null
+  guidance: 4.0
+  bpm: null
+  density: null
+  brightness: null
+  scale: null
+  mute_bass: false
+  mute_drums: false
+  only_bass_and_drums: false
+  music_generation_mode: QUALITY

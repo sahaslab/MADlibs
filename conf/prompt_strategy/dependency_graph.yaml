@@ -1,0 +1,56 @@
+_target_: madlibs.prompt.dependency_graph.DependencyGraphPromptStrategy
+
+# Random seed
+seed: 0
+
+# Path to POS lexicon used for slot filling
+part_of_speech_filename: ${hydra:runtime.cwd}/data/parts_of_speech.txt
+# Source caption corpus used for role-template induction
+caption_corpus_filename: ${hydra:runtime.cwd}/data/song_describer.csv
+# Zero-based column index containing caption text
+caption_column: 2
+# Whether the caption file has a header row
+caption_has_header: true
+# Delimiter for tabular caption files
+caption_delimiter: ","
+# Optional column used to filter rows
+caption_filter_column: 3
+# Required value in filter column for row inclusion
+caption_filter_value: "True"
+
+# Minimum placeholders required for induced templates
+min_template_placeholders: 3
+# Minimum token length for induced templates
+min_template_tokens: 5
+# Maximum token length for induced templates
+max_template_tokens: 14
+# Cap on induced dependency-role templates retained
+max_graph_templates: 600
+# Minimum field-word count before retaining that word in template-specific vocab
+template_field_vocab_min_count: 2
+# Tokenization pattern used for caption parsing
+token_pattern: "[A-Za-z]+(?:[’'][A-Za-z]+)?(?:[-][A-Za-z]+(?:[’'][A-Za-z]+)?)*|[0-9]+|[.,!?;:]"
+# Regex for validating candidate slot words
+slot_word_pattern: "^[a-z][a-z\\-']+$"
+# Minimum character length for slot words
+min_slot_word_length: 2
+# Maximum character length for slot words
+max_slot_word_length: 20
+
+# Prefix options prepended to every generated prompt body
+prompt_starts:
+  - "Generate a song matching this description: "
+
+# Mapping from dependency-role labels to lexicon POS categories
+role_to_pos:
+  root_verb: verb
+  aux_verb: verb
+  comp_verb: verb
+  root_noun: noun
+  subj_noun: noun
+  obj_noun: noun
+  subj_adj: adj
+  obj_adj: adj
+  adj: adj
+  pre_adv: adv
+  post_adv: adv

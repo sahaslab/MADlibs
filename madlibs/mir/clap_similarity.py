@@ -38,12 +38,12 @@ class CLAPSimilarity(MIRAnalysis):
         return text_embeds
 
     @torch.inference_mode()
-    def encode_audio_chunk(self, audio_48k: torch.Tensor) -> torch.Tensor:
+    def encode_audio_chunk(self, audio_48k: torch.Tensor, sr) -> torch.Tensor:
         """
         audio_48k: mono waveform [time] at 48k
         """
         audio_inputs = self.processor(
-            audios=[audio_48k.cpu().numpy()], return_tensors="pt"
+            audios=[audio_48k.cpu().numpy()], sampling_rate=sr, return_tensors="pt"
         )
         audio_inputs = {
             k: v.to(self.device) for k, v in audio_inputs.items() if hasattr(v, "to")
@@ -67,7 +67,7 @@ class CLAPSimilarity(MIRAnalysis):
         for chunk in _sliding_windows(
             audio_48k, sr, win_size=win_size, hop_size=hop_size
         ):
-            audio_embed = self.encode_audio_chunk(chunk)
+            audio_embed = self.encode_audio_chunk(chunk, sr)
             score = (
                 (text_embed @ audio_embed.T).squeeze().item()
             )  # cosine since normalized

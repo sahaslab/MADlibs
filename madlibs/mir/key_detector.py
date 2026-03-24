@@ -24,7 +24,7 @@ class KeyDetector(MIRAnalysis):
         keys = []
         positions = []
         position = 0
-        for chunk in iterate_tensor_chunks(audio_mono, chunk_size_samples):
+        for chunk in _iterate_tensor_chunks(audio_mono, chunk_size_samples):
             key = infer_key(
                 self.pitch_hcqt,
                 self.pitch_chromanet,
@@ -38,7 +38,7 @@ class KeyDetector(MIRAnalysis):
         return keys, positions
 
 
-def iterate_tensor_chunks(tensor, chunk_size):
+def _iterate_tensor_chunks(tensor, chunk_size):
     n = tensor.size(0)
 
     for start in range(0, n, chunk_size):

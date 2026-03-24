@@ -74,10 +74,10 @@ class InstrumentTagger(MIRAnalysis):
         decoded = self.processor.batch_decode(
             outputs[:, inputs["input_ids"].shape[1] :], skip_special_tokens=True
         )
-        return instruments_output_to_list(decoded[0])
+        return _instruments_output_to_list(decoded[0])
 
 
-def instruments_output_to_list(model_output: str) -> List[str]:
+def _instruments_output_to_list(model_output: str) -> List[str]:
     """
     Convert model output into a Python list of instruments.
 

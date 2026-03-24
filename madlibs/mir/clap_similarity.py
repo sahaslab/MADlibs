@@ -58,7 +58,6 @@ class CLAPSimilarity(MIRAnalysis):
         prompt: str,
         win_size: float = 10.0,
         hop_size: float = 5.0,
-        aggregate: str = "mean",
     ) -> Dict:
         audio_48k, sr = _prepare_audio(audio_path)
         text_embed = self.encode_text(prompt)
@@ -70,20 +69,12 @@ class CLAPSimilarity(MIRAnalysis):
             audio_embed = self.encode_audio_chunk(chunk, sr)
             score = (
                 (text_embed @ audio_embed.T).squeeze().item()
-            )  # cosine since normalized
+            )
             scores.append(score)
 
-        if aggregate == "max":
-            agg = max(scores)
-        elif aggregate == "mean":
-            agg = sum(scores) / len(scores)
-        else:
-            raise ValueError("aggregate must be 'mean' or 'max'")
+        return {"similarity_scores": scores}
 
-        return {
-            "aggregate_score": agg,
-            "window_scores": scores,
-        }
+        
 
 
 def _prepare_audio(path: str) -> Tuple[torch.Tensor, int]:

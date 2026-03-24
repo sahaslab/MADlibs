@@ -6,7 +6,7 @@ import pytest
 import librosa
 import torch
 from beat_this.inference import File2Beats
-from madlibs.mir.time_signature import CLAPSimilarity
+from madlibs.mir.time_signature import TimeSignature
 
 
 def test_time_signature():

@@ -1,9 +1,9 @@
 from skey.key_detection import infer_key
 from skey.key_detection import load_checkpoint, load_model_components
 import torch
-import torchaudio
 from madlibs.mir.base import MIRAnalysis
-
+from typing import Dict
+import numpy as np
 
 class KeyDetector(MIRAnalysis):
     def __init__(
@@ -17,10 +17,12 @@ class KeyDetector(MIRAnalysis):
         )
         self.device = device
 
-    def process_audio(self, audio_path: str, chunk_size: int) -> str:
-        audio, sr = torchaudio.load(audio_path)
+    def process_audio(self, audio: np.ndarray, sr: int) -> Dict:
+        keys_dict = {}
+        keys_dict["key_info"] = {}
+        chunk_size = 30
         chunk_size_samples = int(sr * chunk_size)
-        audio_mono = torch.mean(audio, dim=0).cpu()
+        audio_mono = torch.mean(torch.Tensor(audio), dim=0).cpu()
         keys = []
         positions = []
         position = 0
@@ -35,7 +37,9 @@ class KeyDetector(MIRAnalysis):
             keys.append(key)
             positions.append(position)
             position += chunk_size
-        return keys, positions
+        keys_dict["key_info"]["keys"] = keys
+        keys_dict["key_info"]["positions"] = positions
+        return keys_dict
 
 
 def _iterate_tensor_chunks(tensor, chunk_size):

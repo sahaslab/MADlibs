@@ -22,7 +22,18 @@ class KeyDetector(MIRAnalysis):
         keys_dict["key_info"] = {}
         chunk_size = 30
         chunk_size_samples = int(sr * chunk_size)
-        audio_mono = torch.mean(torch.Tensor(audio), dim=0).cpu()
+        audio_tensor = torch.as_tensor(audio).cpu()
+
+        # 1-D and only reduce channel dimension for multi-channel audio.
+        if audio_tensor.ndim == 1:
+            audio_mono = audio_tensor
+        elif audio_tensor.ndim >= 2:
+            audio_mono = audio_tensor.mean(dim=0)
+        else:
+            # Degenerate scalar input should still become a 1-D tensor to avoid
+            # downstream "dimension specified as 0 but tensor has no dimensions".
+            audio_mono = audio_tensor.reshape(1)
+        
         keys = []
         positions = []
         position = 0

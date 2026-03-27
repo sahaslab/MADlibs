@@ -43,7 +43,7 @@ class CLAPSimilarity(MIRAnalysis):
         audio_48k: mono waveform [time] at 48k
         """
         audio_inputs = self.processor(
-            audios=[audio_48k.cpu().numpy()], sampling_rate=sr, return_tensors="pt"
+            audio=[audio_48k.cpu().numpy()], sampling_rate=sr, return_tensors="pt"
         )
         audio_inputs = {
             k: v.to(self.device) for k, v in audio_inputs.items() if hasattr(v, "to")

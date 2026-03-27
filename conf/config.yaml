@@ -14,8 +14,8 @@ run:
   n_prompts: 1000
   seed: 0
   overwrite_prompts: false
-  audio_glob: ${run.generated_audio_dir}/*/*/output.wav
-
+  audio_glob: ${run.generated_audio_dir}/*/*/*.wav
+  prompt_filename: prompt.txt
 hydra:
   run:
     dir: ${hydra:runtime.cwd}/results

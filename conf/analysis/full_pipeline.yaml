@@ -9,13 +9,13 @@ pipeline:
     - _target_: madlibs.mir.chroma.ChromagramSum
   beat_analyses:
     - _target_: madlibs.mir.tempo.Tempo
-  instrument_analyses:
-    _target_: madlibs.mir.instrument_analyses.InstrumentTagger
-    model_path: /dartfs/rc/lab/S/SinghN/noah/imPROMPTu/skey/skey.pt
   key_analyses:
-    _target_: madlibs.mir.instrument_analyses.InstrumentTagger
-    model_id: nvidia/music-flamingo-hf
-    cache_dir: /dartfs/rc/lab/S/SinghN/noah/.cache/huggingface/hub
+   - _target_: madlibs.mir.key_detector.KeyDetector
+     model_path: /dartfs/rc/lab/S/SinghN/noah/imPROMPTu/skey/skey.pt
+  instrument_analyses:
+    - _target_: madlibs.mir.instrument_tagger.InstrumentTagger
+      model_id: nvidia/music-flamingo-hf
+      cache_dir: /dartfs/rc/lab/S/SinghN/noah/.cache/huggingface/hub
   clap_analyses:
-    _target_: madlibs.mir.clap_similarity.CLAPSimilarity
-    model_id: laion/clap-htsat-fused
+   - _target_: madlibs.mir.clap_similarity.CLAPSimilarity
+     model_id: laion/clap-htsat-fused

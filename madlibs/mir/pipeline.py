@@ -1,7 +1,6 @@
 import dataclasses
 import librosa
 from madlibs.mir.base import MIRAnalysis
-from madlibs.mir.instrument_tagger import InstrumentTagger
 from typing import Any
 
 
@@ -14,7 +13,6 @@ class MIRPipeline:
     key_analyses: list[MIRAnalysis]
     clap_analyses: list[MIRAnalysis]
     beat_tracker: Any
-    instrument_tagger: Any
 
     def process(
         self, audio_filename: str, prompt_filename:str, metadata: dict[str, Any] | None = None
@@ -34,7 +32,7 @@ class MIRPipeline:
         for analysis in self.instrument_analyses:
             processed.update(analysis.process_audio(audio_path=audio_filename))
         for analysis in self.key_analyses:
-            processed.update(analysis.process_audio(data=(audio, sr)))
+            processed.update(analysis.process_audio(audio=audio, sr=sr))
         for analysis in self.clap_analyses:
             processed.update(analysis.process_audio(audio_path=audio_filename, prompt=prompt))
         return processed

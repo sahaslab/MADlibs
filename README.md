@@ -1,5 +1,5 @@
 # MAD-libs
-Study on the distribution of generated outputs from ***M***usicGen, ***A***CE-Step, and ***D***iffRhythm
+Study on the distribution of generated outputs from ***M***usicGen, ***A***CE-Step, ***D***iffRhythm, and ***L***yria
 
 ## Dependencies
 Run `pip install -r requirements.txt` to install dependencies.

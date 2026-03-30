@@ -32,5 +32,5 @@ cd /dartfs/rc/lab/S/SinghN/noah/imPROMPTu/madlibs
 
 python run_generation.py generator=acestep prompt_strategy=keyword_mix run.output_dir=MADLibs_output hydra.run.dir=/dartfs/rc/lab/S/SinghN/shared
 
-python run_analysis.py analysis=full_pipeline generator=acestep prompt_strategy=keyword_mix run.output_dir=MADLibs_output hydra.run.dir=/dartfs/rc/lab/S/SinghN/shared
+python run_mir.py analysis=full_pipeline generator=acestep prompt_strategy=keyword_mix run.output_dir=MADLibs_output hydra.run.dir=/dartfs/rc/lab/S/SinghN/shared
 

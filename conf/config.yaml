@@ -9,8 +9,8 @@ run:
   prompt_strategy_name: ${hydra:runtime.choices.prompt_strategy}
   gen_model_name: ${hydra:runtime.choices.generator}
   prompts_filename: ${hydra:run.dir}/${run.output_dir}/${run.prompt_strategy_name}/prompts.txt
-  generated_audio_dir: ${hydra:run.dir}/${run.outpir_dir}/${run.prompt_strategy_name}/${run.gen_model_name}/generated
-  mir_output_filename: ${hydra:run.dir}/${run.outpir_dir}/${run.prompt_strategy_name}/${run.gen_model_name}/mir/mir_results.jsonl
+  generated_audio_dir: ${hydra:run.dir}/${run.output_dir}/${run.prompt_strategy_name}/${run.gen_model_name}/generated
+  mir_output_filename: ${hydra:run.dir}/${run.output_dir}/${run.prompt_strategy_name}/${run.gen_model_name}/mir/mir_results.jsonl
   n_prompts: 1000
   seed: 0
   overwrite_prompts: false

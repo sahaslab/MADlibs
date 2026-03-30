@@ -1,10 +1,11 @@
 import torch
 from transformers import AudioFlamingo3ForConditionalGeneration, AutoProcessor
-from typing import List
+from typing import List, Dict
 import ast
+from madlibs.mir.base import MIRAnalysis
 
 
-class InstrumentTagger:
+class InstrumentTagger(MIRAnalysis):
     def __init__(
         self,
         model_id: str = "nvidia/music-flamingo-hf",
@@ -38,7 +39,9 @@ class InstrumentTagger:
                             Remove duplicates.
                             If no instruments are detected, output none."""
 
-    def tag(self, audio_path: str) -> List[str]:
+    def process_audio(self, audio_path: str) -> Dict:
+
+        instruments_dict = {}
         conversation = [
             {
                 "role": "user",
@@ -72,10 +75,12 @@ class InstrumentTagger:
         decoded = self.processor.batch_decode(
             outputs[:, inputs["input_ids"].shape[1] :], skip_special_tokens=True
         )
-        return instruments_output_to_list(decoded[0])
+        
+        instruments_dict["instruments"] = _instruments_output_to_list(decoded[0])
+        return instruments_dict
 
 
-def instruments_output_to_list(model_output: str) -> List[str]:
+def _instruments_output_to_list(model_output: str) -> List[str]:
     """
     Convert model output into a Python list of instruments.
 

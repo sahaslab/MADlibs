@@ -10,6 +10,7 @@ multirun/
 *.mp3
 
 *instruments.png
+*.png
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

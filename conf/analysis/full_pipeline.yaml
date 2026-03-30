@@ -7,8 +7,10 @@ pipeline:
   audio_analyses:
     - _target_: madlibs.mir.rms.RMSStd
     - _target_: madlibs.mir.chroma.ChromagramSum
+    - _target_: madlibs.mir.longest_silence.LongestSilence
   beat_analyses:
     - _target_: madlibs.mir.tempo.Tempo
+    - _target_: madlibs.mir.time_signature.TimeSignature
   key_analyses:
    - _target_: madlibs.mir.key_detector.KeyDetector
      model_path: /dartfs/rc/lab/S/SinghN/noah/imPROMPTu/skey/skey.pt

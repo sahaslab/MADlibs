@@ -13,7 +13,7 @@
 #SBATCH --ntasks-per-node=1
 
 # Request the GPU partition
-#SBATCH --partition=l40s_nova
+#SBATCH --partition=h200
 
 # Request the GPU partition
 #SBATCH --gpus=1
@@ -26,11 +26,12 @@
 
 source /optnfs/common/miniconda3/etc/profile.d/conda.sh
 
-conda activate madlibs
-
 cd /dartfs/rc/lab/S/SinghN/noah/imPROMPTu/madlibs
 
+conda activate environment_acestep
 python run_generation.py generator=acestep prompt_strategy=keyword_mix run.output_dir=MADLibs_output hydra.run.dir=/dartfs/rc/lab/S/SinghN/shared
 
+conda deactivate
+conda activate madlibs
 python run_mir.py analysis=full_pipeline generator=acestep prompt_strategy=keyword_mix run.output_dir=MADLibs_output hydra.run.dir=/dartfs/rc/lab/S/SinghN/shared
 

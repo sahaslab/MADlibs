@@ -7,6 +7,8 @@ multirun/
 
 # ignore wav files
 *.wav
+# ignore images
+*.png
 
 *instruments.png
 

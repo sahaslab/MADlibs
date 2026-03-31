@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Name of the job
-#SBATCH --job-name=generate_keyword_mix
+#SBATCH --job-name=generate_keyword_mix_diffrhythm
 
 # Account info
 #SBATCH --account=sahaslab-gpu
@@ -28,10 +28,6 @@ source /optnfs/common/miniconda3/etc/profile.d/conda.sh
 
 cd /dartfs/rc/lab/S/SinghN/noah/imPROMPTu/madlibs
 
-conda activate environment_acestep
-python run_generation.py generator=acestep prompt_strategy=keyword_mix run.output_dir=MADLibs_output hydra.run.dir=/dartfs/rc/lab/S/SinghN/shared
-
-conda deactivate
 conda activate madlibs
-python run_mir.py analysis=full_pipeline generator=acestep prompt_strategy=keyword_mix run.output_dir=MADLibs_output hydra.run.dir=/dartfs/rc/lab/S/SinghN/shared
+python run_mir.py analysis=full_pipeline generator=diffrhythm prompt_strategy=keyword_mix run.output_dir=MADLibs_output hydra.run.dir=/dartfs/rc/lab/S/SinghN/shared
 

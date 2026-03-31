@@ -98,11 +98,10 @@ omegaconf==2.3.0
 onnxruntime==1.24.2
 openai==2.24.0
 orjson==3.11.7
-packaging @ file:///home/task_176104885106445/conda-bld/packaging_1761049078006/work
+packaging
 pandas==2.2.3
 phonemizer==3.3.0
 pillow==12.1.1
-pip @ file:///home/task_177071101768311/croot/pip_1770711076895/work
 platformdirs==4.9.2
 pooch==1.9.0
 prefigure==0.0.10

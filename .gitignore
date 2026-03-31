@@ -12,6 +12,9 @@ multirun/
 *instruments.png
 *.png
 
+# Log files
+*.out
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[codz]

@@ -13,7 +13,7 @@
 #SBATCH --ntasks-per-node=1
 
 # Request the GPU partition
-#SBATCH --partition=a100_preemptable
+#SBATCH --partition=h200
 
 # Request the GPU partition
 #SBATCH --gpus=1

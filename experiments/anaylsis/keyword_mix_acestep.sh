@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Name of the job
-#SBATCH --job-name=generate_keyword_mix_acestep
+#SBATCH --job-name=analysis_keyword_mix_acestep
 
 # Account info
 #SBATCH --account=sahaslab-gpu

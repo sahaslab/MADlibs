@@ -1,16 +1,17 @@
 defaults:
   - prompt_strategy: madlibs
   - generator: musicgen
-  - analysis: full_pipeline
+  - analysis: pipelines
+  - analysis_type: mir
   - _self_
 
 run:
   output_dir: outputs
   prompt_strategy_name: ${hydra:runtime.choices.prompt_strategy}
   gen_model_name: ${hydra:runtime.choices.generator}
+  analysis_output_dir: ${hydra:run.dir}/${run.output_dir}/${run.prompt_strategy_name}/${run.gen_model_name}/mir
   prompts_filename: ${hydra:run.dir}/${run.output_dir}/${run.prompt_strategy_name}/prompts.txt
   generated_audio_dir: ${hydra:run.dir}/${run.output_dir}/${run.prompt_strategy_name}/${run.gen_model_name}/generated
-  mir_output_filename: ${hydra:run.dir}/${run.output_dir}/${run.prompt_strategy_name}/${run.gen_model_name}/mir/mir_results.jsonl
   n_prompts: 1000
   seed: 0
   overwrite_prompts: false

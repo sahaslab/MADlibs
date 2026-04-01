@@ -1,0 +1,2 @@
+pipeline_key: mir_pipeline
+output_filename: ${run.analysis_output_dir}/mir_results.jsonl

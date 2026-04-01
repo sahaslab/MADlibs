@@ -1,18 +1,12 @@
 import matplotlib.pyplot as plt
 
-from madlibs.mir.beat_tracker import BeatThisTracker
 from madlibs.mir.chroma import ChromagramSum
-from madlibs.mir.pipeline import MIRPipeline
+from madlibs.mir.mir_pipeline import MIRPipeline
 from madlibs.mir.rms import RMSStd
-from madlibs.mir.tempo import Tempo
 
 
 if __name__ == "__main__":
-    pipeline = MIRPipeline(
-        beat_tracker=BeatThisTracker(checkpoint_path="final0", dbn=False),
-        audio_analyses=[RMSStd(), ChromagramSum()],
-        beat_analyses=[Tempo()],
-    )
+    pipeline = MIRPipeline(audio_analyses=[RMSStd(), ChromagramSum()])
 
     outputs = [
         pipeline.process("tests/mir/ace_step_test.wav"),

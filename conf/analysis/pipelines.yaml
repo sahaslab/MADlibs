@@ -1,23 +1,26 @@
-pipeline:
-  _target_: madlibs.mir.pipeline.MIRPipeline
-  beat_tracker:
-    _target_: madlibs.mir.beat_tracker.BeatThisTracker
-    checkpoint_path: final0
-    dbn: false
+mir_pipeline:
+  _target_: madlibs.mir.mir_pipeline.MIRPipeline
   audio_analyses:
     - _target_: madlibs.mir.rms.RMSStd
     - _target_: madlibs.mir.chroma.ChromagramSum
     - _target_: madlibs.mir.longest_silence.LongestSilence
+
+gpu_pipeline:
+  _target_: madlibs.mir.gpu_pipeline.GPUPipeline
+  beat_tracker:
+    _target_: madlibs.mir.beat_tracker.BeatThisTracker
+    checkpoint_path: final0
+    dbn: false
   beat_analyses:
     - _target_: madlibs.mir.tempo.Tempo
     - _target_: madlibs.mir.time_signature.TimeSignature
   key_analyses:
-   - _target_: madlibs.mir.key_detector.KeyDetector
-     model_path: /dartfs/rc/lab/S/SinghN/noah/imPROMPTu/skey/skey.pt
+    - _target_: madlibs.mir.key_detector.KeyDetector
+      model_path: /dartfs/rc/lab/S/SinghN/noah/imPROMPTu/skey/skey.pt
   instrument_analyses:
     - _target_: madlibs.mir.instrument_tagger.InstrumentTagger
       model_id: nvidia/music-flamingo-hf
       cache_dir: /dartfs/rc/lab/S/SinghN/noah/.cache/huggingface/hub
   clap_analyses:
-   - _target_: madlibs.mir.clap_similarity.CLAPSimilarity
-     model_id: laion/clap-htsat-fused
+    - _target_: madlibs.mir.clap_similarity.CLAPSimilarity
+      model_id: laion/clap-htsat-fused

@@ -1,0 +1,2 @@
+pipeline_key: gpu_pipeline
+output_filename: ${run.analysis_output_dir}/gpu_results.jsonl

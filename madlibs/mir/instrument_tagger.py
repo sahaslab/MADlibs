@@ -68,8 +68,10 @@ class InstrumentTagger(MIRAnalysis):
             tokenize=True,
             add_generation_prompt=True,
             return_dict=True,
-            return_tensors="pt",
-            padding=True,
+            processor_kwargs={
+                "return_tensors": "pt",
+                "padding": True,
+            },
         )
 
         # Move to device, and cast float tensors to the model dtype (bf16),

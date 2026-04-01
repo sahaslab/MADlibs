@@ -13,7 +13,7 @@ offload_dit_to_cpu: false
 params:
   lyrics: "[Instrumental]"
   instrumental: true
-  duration: 60
+  duration: 90
   inference_steps: 8
   guidance_scale: 7
   seed: -1

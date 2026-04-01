@@ -40,23 +40,36 @@ class InstrumentTagger(MIRAnalysis):
                             If no instruments are detected, output none."""
 
     def process_audio(self, audio_path: str) -> Dict:
-
-        instruments_dict = {}
-        conversation = [
-            {
-                "role": "user",
-                "content": [
-                    {"type": "text", "text": self.prompt},
-                    {"type": "audio", "path": audio_path},
-                ],
-            }
+        conversations = [
+            [
+                {
+                    "role": "user",
+                    "content": [
+                        {"type": "text", "text": self.prompt},
+                        {"type": "audio", "path": audio_path},
+                    ],
+                }
+            ]
         ]
+        return self.process_audio_batch(
+            audio_paths=[audio_path], conversations=conversations
+        )[0]
+
+    def process_audio_batch(
+        self, audio_paths: List[str], conversations: List[List[Dict]]
+    ) -> List[Dict]:
+        if len(audio_paths) != len(conversations):
+            raise ValueError("audio_paths and conversations must have equal length")
+        if len(audio_paths) == 0:
+            return []
 
         inputs = self.processor.apply_chat_template(
-            conversation,
+            conversations,
             tokenize=True,
             add_generation_prompt=True,
             return_dict=True,
+            return_tensors="pt",
+            padding=True,
         )
 
         # Move to device, and cast float tensors to the model dtype (bf16),
@@ -70,14 +83,19 @@ class InstrumentTagger(MIRAnalysis):
                 inputs[k] = v
 
         with torch.inference_mode():
-            outputs = self.model.generate(**inputs, max_new_tokens=1024)
+            outputs = self.model.generate(
+                **inputs, max_new_tokens=32, do_sample=False, num_beams=1
+            )
 
-        decoded = self.processor.batch_decode(
-            outputs[:, inputs["input_ids"].shape[1] :], skip_special_tokens=True
-        )
-        
-        instruments_dict["instruments"] = _instruments_output_to_list(decoded[0])
-        return instruments_dict
+        input_lengths = inputs["attention_mask"].sum(dim=1)
+        decoded = []
+        for row_idx, input_len in enumerate(input_lengths):
+            generated_tokens = outputs[row_idx, int(input_len) :]
+            decoded.append(
+                self.processor.decode(generated_tokens, skip_special_tokens=True)
+            )
+
+        return [{"instruments": _instruments_output_to_list(text)} for text in decoded]
 
 
 def _instruments_output_to_list(model_output: str) -> List[str]:

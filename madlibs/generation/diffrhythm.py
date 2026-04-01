@@ -49,7 +49,7 @@ class DiffRhythm(MusicGenerator):
     def __init__(
         self,
         checkpoint_dir: str,
-        audio_length: int = 95,
+        audio_length: int = 90,
         repo_id_short: str = "ASLP-lab/DiffRhythm-1_2",
         repo_id_full: str = "ASLP-lab/DiffRhythm-1_2-full",
         cfm_filename: str = "cfm_model.pt",

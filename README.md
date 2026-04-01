@@ -104,7 +104,10 @@ Command:
 `python run_generation.py generator=musicgen`
 
 3. Run analysis:
-`python run_mir.py analysis=full_pipeline`
+`python run_mir.py analysis_type=mir`
+
+4. Run the GPU-heavy analysis pass:
+`python run_mir.py analysis_type=gpu`
 
 ### Lyria
 Lyria can be run with:

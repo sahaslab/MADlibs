@@ -12,14 +12,20 @@ from tqdm.auto import tqdm
 logger = logging.getLogger(__name__)
 
 
+def _resolve_pipeline_config(cfg: DictConfig):
+    pipeline_key = cfg.analysis_type.pipeline_key
+    return cfg.analysis[pipeline_key]
+
+
 @hydra.main(version_base=None, config_path="conf", config_name="config")
 def main(cfg: DictConfig):
-    pipeline = instantiate(cfg.analysis.pipeline)
+    pipeline = instantiate(_resolve_pipeline_config(cfg))
     audio_paths = sorted(glob.glob(cfg.run.audio_glob))
     assert len(audio_paths) > 0, f"No audio files found for glob: {cfg.run.audio_glob}"
     prompt_filename = cfg.run.prompt_filename
-    output_path = cfg.run.mir_output_filename
+    output_path = cfg.analysis_type.output_filename
     os.makedirs(os.path.dirname(output_path), exist_ok=True)
+    written_count = 0
     with open(output_path, "w", encoding="utf-8") as file_obj:
         for audio_path in tqdm(audio_paths):
             # First check if file is valid
@@ -42,7 +48,8 @@ def main(cfg: DictConfig):
                 for key, value in result.items()
             }
             file_obj.write(json.dumps(serializable) + "\n")
-    print(f"Wrote MIR results for {len(audio_paths)} files to {output_path}")
+            written_count += 1
+    print(f"Wrote {cfg.analysis_type.pipeline_key} results for {written_count} files to {output_path}")
 
 
 if __name__ == "__main__":

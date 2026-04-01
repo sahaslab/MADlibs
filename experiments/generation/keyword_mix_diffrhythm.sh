@@ -13,13 +13,13 @@
 #SBATCH --ntasks-per-node=1
 
 # Request the GPU partition
-#SBATCH --partition=h200
+#SBATCH --partition=v100_preemptable
 
 # Request the GPU partition
 #SBATCH --gpus=1
 
 # Walltime (job duration)
-#SBATCH --time=12:00:00
+#SBATCH --time=3:00:00
 
 # Request CPU memory 
 #SBATCH --mem-per-cpu 300GB

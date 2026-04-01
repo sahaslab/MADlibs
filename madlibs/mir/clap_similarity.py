@@ -14,9 +14,12 @@ class CLAPSimilarity(MIRAnalysis):
     def __init__(
         self,
         model_id: str = "laion/clap-htsat-fused",
-        device: str = "cpu",
+        device: str = "cuda",
     ) -> None:
-        self.device = torch.device(device)
+        requested_device = torch.device(device)
+        if requested_device.type == "cuda" and not torch.cuda.is_available():
+            requested_device = torch.device("cpu")
+        self.device = requested_device
         self.processor = ClapProcessor.from_pretrained(model_id)
         self.text_model = (
             ClapTextModelWithProjection.from_pretrained(model_id).to(self.device).eval()
@@ -67,14 +70,10 @@ class CLAPSimilarity(MIRAnalysis):
             audio_48k, sr, win_size=win_size, hop_size=hop_size
         ):
             audio_embed = self.encode_audio_chunk(chunk, sr)
-            score = (
-                (text_embed @ audio_embed.T).squeeze().item()
-            )
+            score = (text_embed @ audio_embed.T).squeeze().item()
             scores.append(score)
 
         return {"similarity_scores": scores}
-
-        
 
 
 def _prepare_audio(path: str) -> Tuple[torch.Tensor, int]:

@@ -12,7 +12,9 @@ def load_jsonl(path: str) -> Iterable[Dict[str, Any]]:
             try:
                 yield json.loads(line)
             except json.JSONDecodeError as e:
-                raise ValueError(f"Invalid JSON on line {line_num} of {path}: {e}") from e
+                raise ValueError(
+                    f"Invalid JSON on line {line_num} of {path}: {e}"
+                ) from e
 
 
 def get_audio_filename(record: Dict[str, Any]) -> str:
@@ -106,7 +108,9 @@ def main() -> None:
     output_records = []
 
     for key in sorted(shared_keys):
-        merged = merge_records(file1_records[key], file2_records[key], prefer=args.prefer)
+        merged = merge_records(
+            file1_records[key], file2_records[key], prefer=args.prefer
+        )
         output_records.append(merged)
 
     if args.keep_unmatched:

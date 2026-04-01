@@ -17,6 +17,7 @@ class CorpusPromptStrategy(PromptStrategy):
     """
     Where we assume there is a corpus of captions available
     """
+
     seed: int = 0
     caption_corpus_filename: str = ""
     caption_column: int = 2
@@ -41,7 +42,10 @@ class CorpusPromptStrategy(PromptStrategy):
             if self.caption_has_header:
                 next(reader, None)
             for row in reader:
-                if self.caption_filter_column is not None and self.caption_filter_value is not None:
+                if (
+                    self.caption_filter_column is not None
+                    and self.caption_filter_value is not None
+                ):
                     row_value = row[self.caption_filter_column].strip().lower()
                     target_value = self.caption_filter_value.strip().lower()
                     if row_value != target_value:

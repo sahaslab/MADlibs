@@ -14,9 +14,6 @@ pipeline:
   key_analyses:
    - _target_: madlibs.mir.key_detector.KeyDetector
      model_path: /dartfs/rc/lab/S/SinghN/noah/imPROMPTu/skey/skey.pt
-  clap_analyses:
-   - _target_: madlibs.mir.clap_similarity.CLAPSimilarity
-     model_id: laion/clap-htsat-fused
 instrument_pipeline:
   _target_: madlibs.mir.instrument_pipeline.InstrumentPipeline
   batch_size: 4
@@ -24,3 +21,9 @@ instrument_pipeline:
     _target_: madlibs.mir.instrument_tagger.InstrumentTagger
     model_id: nvidia/music-flamingo-hf
     cache_dir: /dartfs/rc/lab/S/SinghN/noah/.cache/huggingface/hub
+clap_pipeline:
+  _target_: madlibs.mir.clap_pipeline.CLAPPipeline
+  clap_analyses:
+    - _target_: madlibs.mir.clap_similarity.CLAPSimilarity
+      model_id: laion/clap-htsat-fused
+      device: cuda

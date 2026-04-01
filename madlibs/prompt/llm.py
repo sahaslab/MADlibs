@@ -14,7 +14,7 @@ from madlibs.prompt.common import (
     build_word_to_pos_lookup,
     load_part_of_speech_words,
     normalize_token,
-    tokenize_with_regex
+    tokenize_with_regex,
 )
 
 
@@ -48,7 +48,9 @@ class LLMPromptStrategy(CorpusPromptStrategy):
     captions_per_request: int = 8
     max_source_captions: int | None = None
     output_prefix: str = "Song where "
-    slot_pos: list[str] = dataclasses.field(default_factory=lambda: ["adj", "noun", "verb", "adv"])
+    slot_pos: list[str] = dataclasses.field(
+        default_factory=lambda: ["adj", "noun", "verb", "adv"]
+    )
     token_pattern: str = r"[A-Za-z]+(?:[’'][A-Za-z]+)?(?:[-][A-Za-z]+(?:[’'][A-Za-z]+)?)*|[0-9]+|[.,!?;:]"
     slot_word_pattern: str = r"^[a-z][a-z\-']+$"
     min_slot_word_length: int = 2
@@ -58,9 +60,13 @@ class LLMPromptStrategy(CorpusPromptStrategy):
     temperature: float = 1.0
     num_workers: int = 16
     words: PosLexicon = dataclasses.field(default_factory=dict)
-    word_to_pos_lookup: WordLookup = dataclasses.field(default_factory=dict, init=False, repr=False)
+    word_to_pos_lookup: WordLookup = dataclasses.field(
+        default_factory=dict, init=False, repr=False
+    )
     slot_word_regex: Pattern[str] = dataclasses.field(init=False, repr=False)
-    slot_pos_set: set[str] = dataclasses.field(default_factory=set, init=False, repr=False)
+    slot_pos_set: set[str] = dataclasses.field(
+        default_factory=set, init=False, repr=False
+    )
     token_regex: Pattern[str] = dataclasses.field(init=False, repr=False)
 
     def __post_init__(self) -> None:
@@ -69,28 +75,43 @@ class LLMPromptStrategy(CorpusPromptStrategy):
         self.slot_pos_set = set(self.slot_pos)
         self.token_regex = re.compile(self.token_pattern)
         if self.part_of_speech_filename:
-            self.words = load_part_of_speech_words(self.part_of_speech_filename, self.slot_word_regex, self.min_slot_word_length, self.max_slot_word_length)
+            self.words = load_part_of_speech_words(
+                self.part_of_speech_filename,
+                self.slot_word_regex,
+                self.min_slot_word_length,
+                self.max_slot_word_length,
+            )
             self.word_to_pos_lookup = build_word_to_pos_lookup(self.words)
 
     def get_prompts(self, n_prompts: int, seed: int | None = None) -> list[str]:
-        _ = seed # Keeping seed in signature for compatibility
+        _ = seed  # Keeping seed in signature for compatibility
 
-        if self.generation_mode == "seed": # Unconditional generation of prompts
+        if self.generation_mode == "seed":  # Unconditional generation of prompts
             return self.get_seed_prompts(n_prompts)
 
-        if self.generation_mode == "caption_alternates": # Generate prompts by varying captions from the corpus
+        if (
+            self.generation_mode == "caption_alternates"
+        ):  # Generate prompts by varying captions from the corpus
             return self.get_caption_alternate_prompts()
 
-        raise ValueError("generation_mode must be one of: seed, caption_alternates. Got %s." % (self.generation_mode))
+        raise ValueError(
+            "generation_mode must be one of: seed, caption_alternates. Got %s."
+            % (self.generation_mode)
+        )
 
     def get_seed_prompts(self, n_prompts: int) -> list[str]:
         max_workers = max(1, min(self.num_workers, n_prompts))
         prompts = [""] * n_prompts
 
         with ThreadPoolExecutor(max_workers=max_workers) as executor:
-            future_to_idx = {executor.submit(self.generate_one_seed_prompt): idx for idx in range(n_prompts)}
+            future_to_idx = {
+                executor.submit(self.generate_one_seed_prompt): idx
+                for idx in range(n_prompts)
+            }
 
-            for future in tqdm(as_completed(future_to_idx), total=n_prompts, desc="Generating prompts"):
+            for future in tqdm(
+                as_completed(future_to_idx), total=n_prompts, desc="Generating prompts"
+            ):
                 idx = future_to_idx[future]
                 prompts[idx] = future.result()
 
@@ -107,7 +128,7 @@ class LLMPromptStrategy(CorpusPromptStrategy):
             messages=messages,
             max_new_tokens=self.max_new_tokens,
             temperature=self.temperature,
-            response_format=PromptOutput
+            response_format=PromptOutput,
         )
 
         response_text = response["choices"][0]["message"]["content"].strip()
@@ -122,7 +143,9 @@ class LLMPromptStrategy(CorpusPromptStrategy):
         if self.max_source_captions is not None:
             captions = captions[: self.max_source_captions]
 
-        caption_templates = [self.caption_to_slot_template(caption) for caption in captions]
+        caption_templates = [
+            self.caption_to_slot_template(caption) for caption in captions
+        ]
         caption_batches = self.build_caption_batches(captions, caption_templates)
 
         # Run batch requests concurrently and stitch results back to original source order
@@ -130,11 +153,21 @@ class LLMPromptStrategy(CorpusPromptStrategy):
         prompt_blocks = [[] for _ in range(len(captions))]
         with ThreadPoolExecutor(max_workers=max_workers) as executor:
             future_to_idx = {
-                executor.submit(self.generate_alternates_for_caption_batch, batch_captions, batch_templates): idx
-                for idx, (_, batch_captions, batch_templates) in enumerate(caption_batches)
+                executor.submit(
+                    self.generate_alternates_for_caption_batch,
+                    batch_captions,
+                    batch_templates,
+                ): idx
+                for idx, (_, batch_captions, batch_templates) in enumerate(
+                    caption_batches
+                )
             }
 
-            for future in tqdm(as_completed(future_to_idx), total=len(caption_batches), desc="Generating prompts"):
+            for future in tqdm(
+                as_completed(future_to_idx),
+                total=len(caption_batches),
+                desc="Generating prompts",
+            ):
                 idx = future_to_idx[future]
                 batch_start, _, _ = caption_batches[idx]
                 caption_block_prompts = future.result()
@@ -149,21 +182,33 @@ class LLMPromptStrategy(CorpusPromptStrategy):
 
         return prompts
 
-    def build_caption_batches(self, captions: list[str], caption_templates: list[str]) -> list[tuple[int, list[str], list[str]]]:
+    def build_caption_batches(
+        self, captions: list[str], caption_templates: list[str]
+    ) -> list[tuple[int, list[str], list[str]]]:
         batches = []
 
         for start_idx in range(0, len(captions), self.captions_per_request):
             end_idx = min(start_idx + self.captions_per_request, len(captions))
-            batches.append((start_idx, captions[start_idx:end_idx], caption_templates[start_idx:end_idx]))
+            batches.append(
+                (
+                    start_idx,
+                    captions[start_idx:end_idx],
+                    caption_templates[start_idx:end_idx],
+                )
+            )
 
         return batches
 
-    def generate_alternates_for_caption_batch(self, original_captions: list[str], slot_template_captions: list[str]) -> list[list[str]]:
-        user_text = self.format_caption_alternates_batch_user_text(original_captions, slot_template_captions)
+    def generate_alternates_for_caption_batch(
+        self, original_captions: list[str], slot_template_captions: list[str]
+    ) -> list[list[str]]:
+        user_text = self.format_caption_alternates_batch_user_text(
+            original_captions, slot_template_captions
+        )
 
         messages = [
             {"content": self.alternates_system_instruction, "role": "system"},
-            {"content": user_text, "role": "user"}
+            {"content": user_text, "role": "user"},
         ]
 
         response = litellm.completion(
@@ -171,18 +216,24 @@ class LLMPromptStrategy(CorpusPromptStrategy):
             messages=messages,
             max_new_tokens=self.max_new_tokens,
             temperature=self.temperature,
-            response_format=CaptionAlternatesBatchOutput
+            response_format=CaptionAlternatesBatchOutput,
         )
 
         response_text = response["choices"][0]["message"]["content"].strip()
         raw_caption_groups = self.extract_caption_groups(response_text)
-        caption_groups = self.normalize_caption_groups(raw_caption_groups, len(original_captions), self.alternates_per_caption)
+        caption_groups = self.normalize_caption_groups(
+            raw_caption_groups, len(original_captions), self.alternates_per_caption
+        )
 
         batch_prompts = []
         for caption_idx, caption_prompts in enumerate(caption_groups):
             prompts = [prompt.strip() for prompt in caption_prompts if prompt.strip()]
-            prompts = self.normalize_prompt_count(prompts, self.alternates_per_caption, original_captions[caption_idx])
-            batch_prompts.append([self.apply_output_prefix(prompt) for prompt in prompts])
+            prompts = self.normalize_prompt_count(
+                prompts, self.alternates_per_caption, original_captions[caption_idx]
+            )
+            batch_prompts.append(
+                [self.apply_output_prefix(prompt) for prompt in prompts]
+            )
 
         return batch_prompts
 
@@ -195,7 +246,11 @@ class LLMPromptStrategy(CorpusPromptStrategy):
             data = json.loads(response_text)
             raw_prompts = data.get("prompts", [])
 
-            if isinstance(raw_prompts, list) and raw_prompts and isinstance(raw_prompts[0], str):
+            if (
+                isinstance(raw_prompts, list)
+                and raw_prompts
+                and isinstance(raw_prompts[0], str)
+            ):
                 return [[str(prompt) for prompt in raw_prompts]]
 
             if isinstance(raw_prompts, list):
@@ -211,10 +266,7 @@ class LLMPromptStrategy(CorpusPromptStrategy):
             return [[]]
 
     def normalize_caption_groups(
-        self,
-        caption_groups: list[list[str]],
-        target_count: int,
-        target_group_size: int
+        self, caption_groups: list[list[str]], target_count: int, target_group_size: int
     ) -> list[list[str]]:
         if len(caption_groups) == target_count:
             return caption_groups
@@ -239,9 +291,14 @@ class LLMPromptStrategy(CorpusPromptStrategy):
         if len(caption_groups) > target_count:
             return caption_groups[:target_count]
 
-        return [list(caption_groups[idx % len(caption_groups)]) for idx in range(target_count)]
+        return [
+            list(caption_groups[idx % len(caption_groups)])
+            for idx in range(target_count)
+        ]
 
-    def normalize_prompt_count(self, prompts: list[str], target_count: int, fallback_prompt: str) -> list[str]:
+    def normalize_prompt_count(
+        self, prompts: list[str], target_count: int, fallback_prompt: str
+    ) -> list[str]:
         if len(prompts) >= target_count:
             return prompts[:target_count]
 
@@ -250,7 +307,9 @@ class LLMPromptStrategy(CorpusPromptStrategy):
 
         return [prompts[idx % len(prompts)] for idx in range(target_count)]
 
-    def format_caption_alternates_batch_user_text(self, original_captions: list[str], slot_template_captions: list[str]) -> str:
+    def format_caption_alternates_batch_user_text(
+        self, original_captions: list[str], slot_template_captions: list[str]
+    ) -> str:
         batch_size = len(original_captions)
         captions_json = json.dumps(original_captions, ensure_ascii=True)
         slot_templates_json = json.dumps(slot_template_captions, ensure_ascii=True)
@@ -273,7 +332,7 @@ class LLMPromptStrategy(CorpusPromptStrategy):
             self.alternates_per_caption,
             batch_size,
             self.output_prefix,
-            self.alternates_per_caption
+            self.alternates_per_caption,
         )
 
     def apply_output_prefix(self, prompt: str) -> str:
@@ -314,7 +373,9 @@ class LLMPromptStrategy(CorpusPromptStrategy):
         if not template_caption:
             return self.output_prefix.strip()
 
-        if self.output_prefix and not template_caption.lower().startswith(self.output_prefix.lower()):
+        if self.output_prefix and not template_caption.lower().startswith(
+            self.output_prefix.lower()
+        ):
             return "%s%s" % (self.output_prefix, template_caption)
 
         return template_caption

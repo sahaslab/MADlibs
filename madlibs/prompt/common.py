@@ -25,7 +25,7 @@ def is_valid_slot_word(
     word: str,
     slot_word_regex: Pattern[str],
     min_slot_word_length: int,
-    max_slot_word_length: int
+    max_slot_word_length: int,
 ) -> bool:
     if (len(word) < min_slot_word_length) or (len(word) > max_slot_word_length):
         return False
@@ -37,7 +37,7 @@ def load_part_of_speech_words(
     part_of_speech_filename: str,
     slot_word_regex: Pattern[str],
     min_slot_word_length: int,
-    max_slot_word_length: int
+    max_slot_word_length: int,
 ) -> PosLexicon:
     words = {}
 
@@ -53,7 +53,13 @@ def load_part_of_speech_words(
 
         row_words = [word.strip() for word in line.split(",")]
         cleaned_words = [clean_slot_word(word) for word in row_words]
-        filtered_words = [word for word in cleaned_words if is_valid_slot_word(word, slot_word_regex, min_slot_word_length, max_slot_word_length)]
+        filtered_words = [
+            word
+            for word in cleaned_words
+            if is_valid_slot_word(
+                word, slot_word_regex, min_slot_word_length, max_slot_word_length
+            )
+        ]
         words[current_pos].extend(filtered_words)
 
     return words
@@ -92,7 +98,7 @@ def template_fields_in_order(template: str) -> list[str]:
 def finalize_template_field_word_weights(
     template_field_counts: TemplateFieldCounts,
     selected_templates: list[str],
-    min_count: int
+    min_count: int,
 ) -> TemplateFieldWordWeights:
     result = {}
     for template in selected_templates:
@@ -101,7 +107,9 @@ def finalize_template_field_word_weights(
 
         field_weights = {}
         for field_name, counts in template_field_counts[template].items():
-            filtered_items = [(word, count) for word, count in counts.items() if count >= min_count]
+            filtered_items = [
+                (word, count) for word, count in counts.items() if count >= min_count
+            ]
             if not filtered_items:
                 filtered_items = list(counts.items())
             field_words = [word for word, _ in filtered_items]

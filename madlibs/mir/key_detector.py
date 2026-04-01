@@ -5,17 +5,21 @@ from madlibs.mir.base import MIRAnalysis
 from typing import Dict
 import numpy as np
 
+
 class KeyDetector(MIRAnalysis):
     def __init__(
         self,
         model_path: str = "/dartfs/rc/lab/S/SinghN/noah/imPROMPTu/skey/skey.pt",
-        device: str = "cpu",
+        device: str = "cuda",
     ) -> None:
+        requested_device = torch.device(device)
+        if requested_device.type == "cuda" and not torch.cuda.is_available():
+            requested_device = torch.device("cpu")
+        self.device = requested_device
         ckpt = load_checkpoint(model_path)
         self.pitch_hcqt, self.pitch_chromanet, self.pitch_crop_fn = (
-            load_model_components(ckpt, device)
+            load_model_components(ckpt, self.device)
         )
-        self.device = device
 
     def process_audio(self, audio: np.ndarray, sr: int) -> Dict:
         keys_dict = {}
@@ -33,7 +37,7 @@ class KeyDetector(MIRAnalysis):
             # Degenerate scalar input should still become a 1-D tensor to avoid
             # downstream "dimension specified as 0 but tensor has no dimensions".
             audio_mono = audio_tensor.reshape(1)
-        
+
         keys = []
         positions = []
         position = 0

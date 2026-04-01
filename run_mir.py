@@ -30,11 +30,13 @@ def main(cfg: DictConfig):
                 continue
 
             try:
-                result = pipeline.process(audio_filename=audio_path,prompt_filename=prompt_path)
+                result = pipeline.process(
+                    audio_filename=audio_path, prompt_filename=prompt_path
+                )
             except Exception as error:
                 logger.error(f"Error processing {audio_path}: {error}")
                 continue
-            
+
             serializable = {
                 key: value.tolist() if hasattr(value, "tolist") else value
                 for key, value in result.items()

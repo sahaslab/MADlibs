@@ -75,7 +75,7 @@ class InstrumentTagger(MIRAnalysis):
         decoded = self.processor.batch_decode(
             outputs[:, inputs["input_ids"].shape[1] :], skip_special_tokens=True
         )
-        
+
         instruments_dict["instruments"] = _instruments_output_to_list(decoded[0])
         return instruments_dict
 

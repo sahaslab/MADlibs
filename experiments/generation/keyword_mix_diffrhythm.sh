@@ -19,7 +19,7 @@
 #SBATCH --gpus=1
 
 # Walltime (job duration)
-#SBATCH --time=3:00:00
+#SBATCH --time=5:00:00
 
 # Request CPU memory 
 #SBATCH --mem-per-cpu 300GB
@@ -30,3 +30,7 @@ cd /dartfs/rc/lab/S/SinghN/noah/imPROMPTu/madlibs
 
 conda activate environment_diffrhythm
 python run_generation.py generator=diffrhythm prompt_strategy=keyword_mix run.output_dir=MADLibs_output hydra.run.dir=/dartfs/rc/lab/S/SinghN/shared
+
+conda deactivate
+conda activate madlibs
+python run_mir.py analysis_type=mir generator=diffrhythm prompt_strategy=keyword_mix run.output_dir=MADLibs_output hydra.run.dir=/dartfs/rc/lab/S/SinghN/shared

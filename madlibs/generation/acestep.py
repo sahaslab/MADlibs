@@ -11,7 +11,7 @@ from typing import Any
 class ACEStepParams:
     lyrics: str = "[Instrumental]"
     instrumental: bool = True
-    duration: float = 60.0
+    duration: float = 90.0
     inference_steps: int = 8
     guidance_scale: float = 7.0
     seed: int = -1

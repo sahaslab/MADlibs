@@ -12,7 +12,6 @@ run:
   generated_audio_dir: ${hydra:run.dir}/${run.output_dir}/${run.prompt_strategy_name}/${run.gen_model_name}/generated
   mir_output_filename: ${hydra:run.dir}/${run.output_dir}/${run.prompt_strategy_name}/${run.gen_model_name}/mir/mir_results.jsonl
   instrument_output_filename: ${hydra:run.dir}/${run.output_dir}/${run.prompt_strategy_name}/${run.gen_model_name}/mir/instrument_results.jsonl
-  analysis_type: mir
   n_prompts: 1000
   seed: 0
   overwrite_prompts: false

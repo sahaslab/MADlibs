@@ -18,7 +18,13 @@ def main(cfg: DictConfig):
     assert len(audio_paths) > 0, f"No audio files found for glob: {cfg.run.audio_glob}"
     mir_output_path = cfg.run.mir_output_filename
     instrument_output_path = cfg.run.instrument_output_filename
-    analysis_type = cfg.run.analysis_type
+    analysis_type = cfg.run.get("analysis_type")
+    if analysis_type is None:
+        raise ValueError(
+            "Missing run.analysis_type. Pass it at runtime, e.g. "
+            "`python run_mir.py run.analysis_type=mir` or "
+            "`python run_mir.py run.analysis_type=instrument`."
+        )
     prompt_filename = cfg.run.prompt_filename
     os.makedirs(os.path.dirname(mir_output_path), exist_ok=True)
     os.makedirs(os.path.dirname(instrument_output_path), exist_ok=True)

@@ -7,9 +7,7 @@ import torch
 sys.path.append(os.path.join(os.path.dirname(__file__), "../.."))
 
 if "soundfile" not in sys.modules:
-    sys.modules["soundfile"] = types.SimpleNamespace(
-        write=lambda *args, **kwargs: None
-    )
+    sys.modules["soundfile"] = types.SimpleNamespace(write=lambda *args, **kwargs: None)
 if "transformers" not in sys.modules:
     sys.modules["transformers"] = types.SimpleNamespace(
         AutoProcessor=object,

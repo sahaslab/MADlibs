@@ -1,0 +1,55 @@
+Generating audio:   0%|          | 0/10000 [00:00<?, ?it/s]
+Fetching 2 files:   0%|          | 0/2 [00:00<?, ?it/s][AFetching 2 files: 100%|██████████| 2/2 [00:00<00:00, 364.86it/s]
+
+Loading weights:   0%|          | 0/996 [00:00<?, ?it/s][A
+Loading weights:   1%|▏         | 14/996 [00:00<00:11, 87.16it/s][A
+Loading weights:   9%|▉         | 89/996 [00:00<00:02, 352.82it/s][A
+Loading weights:  13%|█▎        | 128/996 [00:00<00:04, 194.19it/s][A
+Loading weights:  15%|█▌        | 154/996 [00:01<00:10, 78.66it/s] [A
+Loading weights:  17%|█▋        | 171/996 [00:01<00:13, 61.79it/s][A
+Loading weights:  18%|█▊        | 184/996 [00:02<00:14, 54.72it/s][A
+Loading weights:  19%|█▉        | 194/996 [00:02<00:13, 57.72it/s][A
+Loading weights:  20%|██        | 203/996 [00:02<00:16, 47.68it/s][A
+Loading weights:  21%|██        | 210/996 [00:02<00:15, 49.21it/s][A
+Loading weights:  22%|██▏       | 217/996 [00:03<00:21, 35.84it/s][A
+Loading weights:  23%|██▎       | 229/996 [00:03<00:25, 29.82it/s][A
+Loading weights:  25%|██▍       | 245/996 [00:04<00:21, 34.73it/s][A
+Loading weights:  25%|██▌       | 250/996 [00:04<00:21, 34.02it/s][A
+Loading weights:  26%|██▌       | 261/996 [00:04<00:21, 34.29it/s][A
+Loading weights:  27%|██▋       | 273/996 [00:04<00:16, 44.41it/s][A
+Loading weights:  28%|██▊       | 280/996 [00:05<00:27, 25.88it/s][A
+Loading weights:  29%|██▉       | 293/996 [00:06<00:27, 25.51it/s][A
+Loading weights:  31%|███       | 309/996 [00:06<00:22, 31.15it/s][A
+Loading weights:  32%|███▏      | 314/996 [00:06<00:20, 32.72it/s][A
+Loading weights:  32%|███▏      | 322/996 [00:06<00:19, 34.74it/s][A
+Loading weights:  33%|███▎      | 327/996 [00:07<00:27, 24.42it/s][A
+Loading weights:  34%|███▍      | 341/996 [00:07<00:29, 22.25it/s][A
+Loading weights:  36%|███▌      | 357/996 [00:08<00:25, 25.25it/s][A
+Loading weights:  37%|███▋      | 373/996 [00:08<00:21, 29.24it/s][A
+Loading weights:  39%|███▉      | 389/996 [00:08<00:16, 37.55it/s][A
+Loading weights:  40%|███▉      | 394/996 [00:09<00:17, 34.93it/s][A
+Loading weights:  41%|████      | 405/996 [00:09<00:18, 31.82it/s][A
+Loading weights:  42%|████▏     | 421/996 [00:09<00:16, 34.16it/s][A
+Loading weights:  43%|████▎     | 425/996 [00:10<00:16, 34.76it/s][A
+Loading weights:  44%|████▍     | 437/996 [00:10<00:18, 30.63it/s][A
+Loading weights:  45%|████▌     | 453/996 [00:11<00:18, 30.11it/s][A
+Loading weights:  47%|████▋     | 469/996 [00:11<00:14, 37.33it/s][A
+Loading weights:  48%|████▊     | 474/996 [00:11<00:16, 32.47it/s][A
+Loading weights:  49%|████▊     | 485/996 [00:11<00:14, 34.40it/s][A
+Loading weights:  50%|█████     | 501/996 [00:12<00:14, 34.94it/s][A
+Loading weights:  52%|█████▏    | 517/996 [00:12<00:13, 35.56it/s][A
+Loading weights:  54%|█████▎    | 533/996 [00:13<00:15, 30.18it/s][A
+Loading weights:  55%|█████▌    | 550/996 [00:14<00:14, 29.75it/s][A
+Loading weights:  57%|█████▋    | 565/996 [00:14<00:11, 36.48it/s][A
+Loading weights:  57%|█████▋    | 570/996 [00:14<00:12, 34.13it/s][A
+Loading weights:  58%|█████▊    | 581/996 [00:14<00:13, 29.76it/s][A
+Loading weights:  60%|█████▉    | 597/996 [00:15<00:12, 31.91it/s][A
+Loading weights:  62%|██████▏   | 613/996 [00:15<00:10, 35.00it/s][A
+Loading weights:  63%|██████▎   | 626/996 [00:15<00:08, 43.98it/s][A
+Loading weights:  64%|██████▎   | 633/996 [00:16<00:10, 33.99it/s][A
+Loading weights:  65%|██████▍   | 645/996 [00:16<00:10, 32.42it/s][A
+Loading weights:  66%|██████▋   | 661/996 [00:17<00:10, 32.97it/s][A
+Loading weights:  68%|██████▊   | 677/996 [00:17<00:08, 35.62it/s][A
+Loading weights:  69%|██████▉   | 689/996 [00:17<00:07, 41.92it/s][A
+Loading weights:  70%|██████▉   | 695/996 [00:18<00:10, 27.68it/s][A
+Loading weights:  71%|███████   | 709/996 [00:18<00:09, 29.03it/s][Aslurmstepd: error: *** JOB 7973157 ON h200a CANCELLED AT 2026-04-02T11:04:31 ***

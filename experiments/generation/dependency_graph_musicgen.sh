@@ -19,17 +19,20 @@
 #SBATCH --gpus=1
 
 # Walltime (job duration)
-#SBATCH --time=24:00:00
+#SBATCH --time=12:00:00
 
 # Request CPU memory
 #SBATCH --mem-per-cpu 200GB
+
+#SBATCH --output=logs/generate_dependency_graph_musicgen_%j.out
+#SBATCH --error=logs/generate_dependency_graph_musicgen_%j.err
 
 source /optnfs/common/miniconda3/etc/profile.d/conda.sh
 
 cd /dartfs/rc/lab/S/SinghN/noah/imPROMPTu/madlibs
 
 conda activate environment_musicgen
-python run_generation.py generator=musicgen prompt_strategy=dependency_graph generator.batch_size=8 generator.torch_dtype=bfloat16 run.output_dir=MADLibs_output hydra.run.dir=/dartfs/rc/lab/S/SinghN/shared
+python run_generation.py generator=musicgen prompt_strategy=dependency_graph generator.batch_size=32 generator.torch_dtype=bfloat16 run.output_dir=MADLibs_output hydra.run.dir=/dartfs/rc/lab/S/SinghN/shared
 
 conda deactivate
 conda activate madlibs

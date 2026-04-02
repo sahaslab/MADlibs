@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Name of the job
-#SBATCH --job-name=generate_keyword_mix_diffrhythm
+#SBATCH --job-name=analysis_keyword_mix_diffrhythm
 
 # Account info
 #SBATCH --account=sahaslab-gpu
@@ -13,7 +13,7 @@
 #SBATCH --ntasks-per-node=1
 
 # Request the GPU partition
-#SBATCH --partition=a100_preemptable
+#SBATCH --partition=h200
 
 # Request the GPU partition
 #SBATCH --gpus=1

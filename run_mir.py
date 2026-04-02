@@ -49,7 +49,9 @@ def main(cfg: DictConfig):
             }
             file_obj.write(json.dumps(serializable) + "\n")
             written_count += 1
-    print(f"Wrote {cfg.analysis_type.pipeline_key} results for {written_count} files to {output_path}")
+    print(
+        f"Wrote {cfg.analysis_type.pipeline_key} results for {written_count} files to {output_path}"
+    )
 
 
 if __name__ == "__main__":

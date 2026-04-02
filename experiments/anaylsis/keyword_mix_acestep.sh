@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Name of the job
-#SBATCH --job-name=generate_keyword_mix_acestep
+#SBATCH --job-name=analysis_keyword_mix_acestep
 
 # Account info
 #SBATCH --account=sahaslab-gpu
@@ -19,7 +19,7 @@
 #SBATCH --gpus=1
 
 # Walltime (job duration)
-#SBATCH --time=12:00:00
+#SBATCH --time=5:00:00
 
 # Request CPU memory 
 #SBATCH --mem-per-cpu 300GB

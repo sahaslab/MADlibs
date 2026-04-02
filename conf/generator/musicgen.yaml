@@ -4,6 +4,9 @@ defaults:
 _target_: madlibs.generation.musicgen.MusicGen
 model_id: facebook/musicgen-large
 guidance_scale: 3.0
-max_new_tokens: 256
+max_new_tokens: null
+duration_seconds: 30.0
 do_sample: true
 audio_format: wav
+batch_size: 8
+torch_dtype: bfloat16

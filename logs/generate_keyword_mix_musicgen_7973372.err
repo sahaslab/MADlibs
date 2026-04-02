@@ -1,55 +1,0 @@
-Generating audio:   0%|          | 0/1250 [00:00<?, ?it/s]
-Fetching 2 files:   0%|          | 0/2 [00:00<?, ?it/s][AFetching 2 files: 100%|██████████| 2/2 [00:00<00:00, 360.61it/s]
-
-Loading weights:   0%|          | 0/996 [00:00<?, ?it/s][A
-Loading weights:  17%|█▋        | 171/996 [00:00<00:00, 1107.68it/s][A
-Loading weights:  28%|██▊       | 282/996 [00:00<00:01, 562.21it/s] [A
-Loading weights:  35%|███▌      | 350/996 [00:00<00:01, 572.34it/s][A
-Loading weights:  42%|████▏     | 414/996 [00:00<00:01, 453.19it/s][A
-Loading weights:  47%|████▋     | 465/996 [00:00<00:01, 441.16it/s][A
-Loading weights:  51%|█████▏    | 512/996 [00:01<00:01, 415.15it/s][A
-Loading weights:  56%|█████▌    | 555/996 [00:01<00:01, 375.13it/s][A
-Loading weights:  61%|██████    | 603/996 [00:01<00:01, 384.56it/s][A
-Loading weights:  65%|██████▌   | 651/996 [00:01<00:00, 366.07it/s][A
-Loading weights:  69%|██████▉   | 690/996 [00:01<00:00, 369.11it/s][A
-Loading weights:  75%|███████▍  | 745/996 [00:01<00:00, 373.29it/s][A
-Loading weights:  80%|███████▉  | 794/996 [00:01<00:00, 321.03it/s][A
-Loading weights:  88%|████████▊ | 881/996 [00:02<00:00, 417.94it/s][ALoading weights: 100%|██████████| 996/996 [00:02<00:00, 475.87it/s]
-[1mMusicgenForConditionalGeneration LOAD REPORT[0m from: facebook/musicgen-large
-Key                                           | Status     |  | 
-----------------------------------------------+------------+--+-
-decoder.model.decoder.embed_positions.weights | UNEXPECTED |  | 
-
-Notes:
-- UNEXPECTED:	can be ignored when loading from different task/architecture; not ok if you expect identical arch.
-/dartfs/rc/lab/S/SinghN/noah/.conda/envs/environment_musicgen/lib/python3.12/site-packages/torch/nn/modules/rnn.py:1169: UserWarning: RNN module weights are not part of single contiguous chunk of memory. This means they need to be compacted at every call, possibly greatly increasing memory usage. To compact weights again call flatten_parameters(). (Triggered internally at /pytorch/aten/src/ATen/native/cudnn/RNN.cpp:1479.)
-  result = _VF.lstm(
-Generating audio:   0%|          | 1/1250 [01:32<32:09:48, 92.70s/it]Generating audio:   0%|          | 2/1250 [02:00<18:54:17, 54.53s/it]Generating audio:   0%|          | 3/1250 [02:28<14:37:46, 42.23s/it]Generating audio:   0%|          | 4/1250 [02:55<12:37:01, 36.45s/it]Generating audio:   0%|          | 5/1250 [03:22<11:27:41, 33.14s/it]Generating audio:   0%|          | 6/1250 [03:50<10:50:25, 31.37s/it]Generating audio:   1%|          | 7/1250 [04:18<10:24:24, 30.14s/it]Generating audio:   1%|          | 8/1250 [04:46<10:06:52, 29.32s/it]Generating audio:   1%|          | 8/1250 [05:13<13:30:16, 39.14s/it]
-Error executing job with overrides: ['generator=musicgen', 'prompt_strategy=keyword_mix', 'generator.batch_size=8', 'generator.torch_dtype=bfloat16', 'run.output_dir=MADLibs_output']
-Traceback (most recent call last):
-  File "/dartfs/rc/lab/S/SinghN/noah/imPROMPTu/madlibs/run_generation.py", line 22, in main
-    run_dir = generator.generate(
-              ^^^^^^^^^^^^^^^^^^^
-  File "/dartfs/rc/lab/S/SinghN/noah/imPROMPTu/madlibs/madlibs/generation/musicgen.py", line 89, in generate
-    self._generate_batch(
-  File "/dartfs/rc/lab/S/SinghN/noah/imPROMPTu/madlibs/madlibs/generation/musicgen.py", line 127, in _generate_batch
-    sf.write(output_path, generated[idx][0].numpy(), sample_rate)
-  File "/dartfs/rc/lab/S/SinghN/noah/.conda/envs/environment_musicgen/lib/python3.12/site-packages/soundfile.py", line 363, in write
-    with SoundFile(file, 'w', samplerate, channels,
-         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/dartfs/rc/lab/S/SinghN/noah/.conda/envs/environment_musicgen/lib/python3.12/site-packages/soundfile.py", line 690, in __init__
-    self._file = self._open(file, mode_int, closefd)
-                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/dartfs/rc/lab/S/SinghN/noah/.conda/envs/environment_musicgen/lib/python3.12/site-packages/soundfile.py", line 1265, in _open
-    raise LibsndfileError(err, prefix="Error opening {0!r}: ".format(self.name))
-soundfile.LibsndfileError: Error opening '/dartfs/rc/lab/S/SinghN/shared/MADLibs_output/keyword_mix/musicgen/generated/86efa9d0-2ea7-11f1-8bef-507c6f55a591/prompt_64/output.wav': System error.
-
-Set the environment variable HYDRA_FULL_ERROR=1 for a complete stack trace.
-Error executing job with overrides: ['analysis_type=mir', 'generator=musicgen', 'prompt_strategy=keyword_mix', 'run.output_dir=MADLibs_output']
-Traceback (most recent call last):
-  File "/dartfs/rc/lab/S/SinghN/noah/imPROMPTu/madlibs/run_mir.py", line 24, in main
-    assert len(audio_paths) > 0, f"No audio files found for glob: {cfg.run.audio_glob}"
-           ^^^^^^^^^^^^^^^^^^^^
-AssertionError: No audio files found for glob: /dartfs/rc/lab/S/SinghN/shared/MADLibs_output/keyword_mix/musicgen/generated/*/*/*.wav
-
-Set the environment variable HYDRA_FULL_ERROR=1 for a complete stack trace.

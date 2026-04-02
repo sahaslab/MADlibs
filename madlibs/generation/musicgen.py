@@ -70,7 +70,7 @@ class MusicGen(MusicGenerator):
                 guidance_scale=self.guidance_scale,
                 max_new_tokens=self.max_new_tokens,
             )
-        generated = audio_values.detach().cpu()
+        generated = audio_values.detach().to(torch.float32).cpu()
         sample_rate = self.model.config.audio_encoder.sampling_rate
 
         output_path = os.path.join(save_path, f"output.{self.audio_format}")
@@ -120,7 +120,7 @@ class MusicGen(MusicGenerator):
                 max_new_tokens=self.max_new_tokens,
             )
 
-        generated = audio_values.detach().cpu()
+        generated = audio_values.detach().to(torch.float32).cpu()
         sample_rate = self.model.config.audio_encoder.sampling_rate
         for idx, save_path in enumerate(save_paths):
             output_path = os.path.join(save_path, f"output.{self.audio_format}")

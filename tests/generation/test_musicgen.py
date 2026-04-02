@@ -62,7 +62,7 @@ def test_musicgen_batch_generation_writes_one_file_per_prompt(tmp_path, monkeypa
 
         def generate(self, **kwargs):
             batch_size = len(kwargs["text"])
-            return torch.arange(batch_size * 8, dtype=torch.float32).reshape(
+            return torch.arange(batch_size * 8, dtype=torch.bfloat16).reshape(
                 batch_size, 1, 8
             )
 

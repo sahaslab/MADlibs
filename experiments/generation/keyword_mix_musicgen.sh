@@ -2,6 +2,8 @@
 
 # Name of the job
 #SBATCH --job-name=generate_keyword_mix_musicgen
+#SBATCH --output=logs/generate_keyword_mix_musicgen_%j.out
+#SBATCH --error=logs/generate_keyword_mix_musicgen_%j.err
 
 # Account info
 #SBATCH --account=sahaslab-gpu

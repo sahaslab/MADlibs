@@ -2,6 +2,8 @@
 
 # Name of the job
 #SBATCH --job-name=generate_dependency_graph_diffrhythm
+#SBATCH --output=logs/generate_dependency_graph_diffrhythm_%j.out
+#SBATCH --error=logs/generate_dependency_graph_diffrhythm_%j.err
 
 # Account info
 #SBATCH --account=sahaslab-gpu

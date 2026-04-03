@@ -2,6 +2,8 @@
 
 # Name of the job
 #SBATCH --job-name=generate_madlibs_templates_diffrhythm
+#SBATCH --output=logs/generate_madlibs_templates_diffrhythm_%j.out
+#SBATCH --error=logs/generate_madlibs_templates_diffrhythm_%j.err
 
 # Account info
 #SBATCH --account=sahaslab-gpu

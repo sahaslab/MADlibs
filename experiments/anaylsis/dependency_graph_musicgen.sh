@@ -2,6 +2,8 @@
 
 # Name of the job
 #SBATCH --job-name=analysis_dependency_graph_musicgen
+#SBATCH --output=logs/analysis_dependency_graph_musicgen_%j.out
+#SBATCH --error=logs/analysis_dependency_graph_musicgen_%j.err
 # Account info
 #SBATCH --account=sahaslab-gpu
 

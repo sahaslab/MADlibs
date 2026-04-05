@@ -58,6 +58,7 @@ def load_instrument_data(
                 {
                     "line_number": line_number,
                     "audio_filename": audio_filename,
+                    "identified_instruments": unique_instruments,
                     "num_instruments_identified": num_instruments,
                 }
             )
@@ -173,6 +174,7 @@ def write_outliers(
                     {
                         "audio_filename": audio_filename,
                         "prompt": prompt,
+                        "identified_instruments": row["identified_instruments"],
                         "num_instruments_identified": num_instruments,
                     }
                 )

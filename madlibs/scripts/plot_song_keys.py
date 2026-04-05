@@ -145,6 +145,7 @@ def plot_song_key_counts(
     axis.set_title("Most Common Key Per Song")
     axis.set_xlabel("Number of Songs")
     axis.set_ylabel("Canonical Key Group")
+    axis.set_xscale("log")
     axis.invert_yaxis()
 
     output_path.parent.mkdir(parents=True, exist_ok=True)

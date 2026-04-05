@@ -6,9 +6,12 @@ from pathlib import Path
 import matplotlib.pyplot as plt
 
 
-def load_instrument_data(jsonl_path: Path) -> tuple[collections.Counter, collections.Counter]:
+def load_instrument_data(
+    jsonl_path: Path,
+) -> tuple[collections.Counter, collections.Counter, list[dict[str, object]]]:
     instrument_song_counts = collections.Counter()
     instruments_per_song_counts = collections.Counter()
+    outlier_rows: list[dict[str, object]] = []
 
     with jsonl_path.open("r", encoding="utf-8") as file_obj:
         for line_number, raw_line in enumerate(file_obj, start=1):
@@ -41,9 +44,25 @@ def load_instrument_data(jsonl_path: Path) -> tuple[collections.Counter, collect
                 unique_instruments.append(normalized)
 
             instrument_song_counts.update(unique_instruments)
-            instruments_per_song_counts[len(unique_instruments)] += 1
+            num_instruments = len(unique_instruments)
+            instruments_per_song_counts[num_instruments] += 1
 
-    return instrument_song_counts, instruments_per_song_counts
+            metadata = record.get("metadata", {})
+            audio_filename = None
+            if isinstance(metadata, dict):
+                candidate = metadata.get("audio_filename")
+                if isinstance(candidate, str):
+                    audio_filename = candidate
+
+            outlier_rows.append(
+                {
+                    "line_number": line_number,
+                    "audio_filename": audio_filename,
+                    "num_instruments_identified": num_instruments,
+                }
+            )
+
+    return instrument_song_counts, instruments_per_song_counts, outlier_rows
 
 
 def plot_histograms(
@@ -117,13 +136,54 @@ def parse_args() -> argparse.Namespace:
         default=None,
         help="Optional overall title for the figure.",
     )
+    parser.add_argument(
+        "--report-outliers-above",
+        type=int,
+        default=None,
+        help="If set, write songs with more than this many instruments to JSONL.",
+    )
+    parser.add_argument(
+        "--outliers-output",
+        type=Path,
+        default=None,
+        help="Path to the output JSONL file for reported outliers.",
+    )
     return parser.parse_args()
+
+
+def write_outliers(
+    outlier_rows: list[dict[str, object]],
+    threshold: int,
+    output_path: Path,
+) -> None:
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    with output_path.open("w", encoding="utf-8") as file_obj:
+        for row in outlier_rows:
+            num_instruments = row["num_instruments_identified"]
+            if not isinstance(num_instruments, int) or num_instruments <= threshold:
+                continue
+            audio_filename = row["audio_filename"]
+            prompt = None
+            if isinstance(audio_filename, str) and audio_filename:
+                prompt_path = Path(audio_filename).parent / "prompt.txt"
+                if prompt_path.exists():
+                    prompt = prompt_path.read_text(encoding="utf-8").strip()
+            file_obj.write(
+                json.dumps(
+                    {
+                        "audio_filename": audio_filename,
+                        "prompt": prompt,
+                        "num_instruments_identified": num_instruments,
+                    }
+                )
+                + "\n"
+            )
 
 
 def main() -> None:
     args = parse_args()
-    instrument_song_counts, instruments_per_song_counts = load_instrument_data(
-        args.jsonl_path
+    instrument_song_counts, instruments_per_song_counts, outlier_rows = (
+        load_instrument_data(args.jsonl_path)
     )
     plot_histograms(
         instrument_song_counts=instrument_song_counts,
@@ -131,6 +191,16 @@ def main() -> None:
         output_path=args.output,
         figure_title=args.title,
     )
+    if args.report_outliers_above is not None:
+        if args.outliers_output is None:
+            raise ValueError(
+                "--outliers-output must be provided when --report-outliers-above is set."
+            )
+        write_outliers(
+            outlier_rows=outlier_rows,
+            threshold=args.report_outliers_above,
+            output_path=args.outliers_output,
+        )
 
 
 if __name__ == "__main__":

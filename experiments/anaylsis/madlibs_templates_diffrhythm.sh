@@ -21,7 +21,7 @@
 #SBATCH --gpus=1
 
 # Walltime (job duration)
-#SBATCH --time=5:00:00
+#SBATCH --time=7:00:00
 
 # Request CPU memory
 #SBATCH --mem-per-cpu 300GB

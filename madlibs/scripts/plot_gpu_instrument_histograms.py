@@ -70,12 +70,14 @@ def plot_histograms(
     axes[0].set_title("Songs Containing Each Instrument")
     axes[0].set_xlabel("Instrument")
     axes[0].set_ylabel("Number of Songs")
+    axes[0].set_yscale("log")
     axes[0].tick_params(axis="x", rotation=45)
 
     axes[1].bar(num_instruments_labels, num_instruments_values, width=0.8)
     axes[1].set_title("Number of Instruments Per Song")
     axes[1].set_xlabel("Number of Instruments")
     axes[1].set_ylabel("Number of Songs")
+    axes[1].set_yscale("log")
     axes[1].set_xticks(num_instruments_labels)
 
     output_path.parent.mkdir(parents=True, exist_ok=True)

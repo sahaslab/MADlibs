@@ -7,8 +7,8 @@ import matplotlib.pyplot as plt
 
 
 def load_instrument_data(jsonl_path: Path) -> tuple[collections.Counter, collections.Counter]:
-    instrument_song_counts: collections.Counter[str] = collections.Counter()
-    instruments_per_song_counts: collections.Counter[int] = collections.Counter()
+    instrument_song_counts = collections.Counter()
+    instruments_per_song_counts = collections.Counter()
 
     with jsonl_path.open("r", encoding="utf-8") as file_obj:
         for line_number, raw_line in enumerate(file_obj, start=1):
@@ -62,16 +62,25 @@ def plot_histograms(
     num_instruments_labels = [count for count, _ in sorted_song_counts]
     num_instruments_values = [value for _, value in sorted_song_counts]
 
-    figure, axes = plt.subplots(2, 1, figsize=(16, 12), constrained_layout=True)
+    instrument_plot_height = max(8, 0.32 * len(instrument_labels))
+    figure_height = instrument_plot_height + 6
+    figure, axes = plt.subplots(
+        2,
+        1,
+        figsize=(18, figure_height),
+        constrained_layout=True,
+        gridspec_kw={"height_ratios": [max(2, len(instrument_labels) / 12.0), 1.5]},
+    )
     if figure_title:
         figure.suptitle(figure_title, fontsize=16)
 
-    axes[0].bar(instrument_labels, instrument_values)
+    axes[0].barh(instrument_labels, instrument_values)
     axes[0].set_title("Songs Containing Each Instrument")
-    axes[0].set_xlabel("Instrument")
-    axes[0].set_ylabel("Number of Songs")
-    axes[0].set_yscale("log")
-    axes[0].tick_params(axis="x", rotation=45)
+    axes[0].set_xlabel("Number of Songs")
+    axes[0].set_ylabel("Instrument")
+    axes[0].set_xscale("log")
+    axes[0].invert_yaxis()
+    axes[0].tick_params(axis="y", labelsize=9)
 
     axes[1].bar(num_instruments_labels, num_instruments_values, width=0.8)
     axes[1].set_title("Number of Instruments Per Song")

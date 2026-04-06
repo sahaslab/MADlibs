@@ -8,7 +8,11 @@ from madlibs.generation.base import MusicGenerator
 @hydra.main(version_base=None, config_path="conf", config_name="config")
 def main(cfg: DictConfig):
     with open(cfg.run.prompts_filename, "r", encoding="utf-8") as file_obj:
-        prompts = [line.strip() for line in file_obj if line.strip()]
+        prompt_lines = [line.rstrip("\r\n") for line in file_obj]
+    if cfg.run.prompt_strategy_name == "blank":
+        prompts = prompt_lines
+    else:
+        prompts = [line.strip() for line in prompt_lines if line.strip()]
     if not prompts:
         raise ValueError(f"No prompts found in {cfg.run.prompts_filename}")
 

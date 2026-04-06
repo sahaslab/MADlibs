@@ -31,18 +31,18 @@ NOTE_TO_PITCH_CLASS = {
 }
 
 RELATIVE_KEY_LABELS = {
-    0: "C Major / A minor",
-    1: "Db Major / Bb minor",
-    2: "D Major / B minor",
-    3: "Eb Major / C minor",
-    4: "E Major / C# minor",
-    5: "F Major / D minor",
-    6: "Gb Major / Eb minor",
-    7: "G Major / E minor",
-    8: "Ab Major / F minor",
-    9: "A Major / F# minor",
-    10: "Bb Major / G minor",
-    11: "B Major / G# minor",
+    0: "C",
+    1: "Db",
+    2: "D",
+    3: "Eb",
+    4: "E",
+    5: "F",
+    6: "Gb",
+    7: "G",
+    8: "Ab",
+    9: "A",
+    10: "Bb",
+    11: "B",
 }
 
 
@@ -55,7 +55,7 @@ def normalize_note_name(note: str) -> str:
     )
 
 
-def canonicalize_key_name(key_name: str) -> int | None:
+def canonicalize_key_name(key_name: str) -> str | None:
     cleaned = key_name.strip()
     if not cleaned:
         return None
@@ -71,13 +71,13 @@ def canonicalize_key_name(key_name: str) -> int | None:
         return None
 
     if mode == "major":
-        return pitch_class
+        return f"{RELATIVE_KEY_LABELS[pitch_class]} Major"
     if mode == "minor":
-        return (pitch_class + 3) % 12
+        return f"{RELATIVE_KEY_LABELS[pitch_class]} minor"
     return None
 
 
-def select_song_key(keys: list[str]) -> int | None:
+def select_song_key(keys: list[str]) -> str | None:
     canonical_keys = [
         canonical_key
         for canonical_key in (canonicalize_key_name(key_name) for key_name in keys)
@@ -122,7 +122,7 @@ def load_song_key_counts(jsonl_path: Path) -> collections.Counter:
             if song_key is None:
                 continue
 
-            song_key_counts[RELATIVE_KEY_LABELS[song_key]] += 1
+            song_key_counts[song_key] += 1
 
     return song_key_counts
 
@@ -157,7 +157,7 @@ def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
         description=(
             "Plot the most common song key from a GPU MIR results JSONL file, "
-            "collapsing enharmonic equivalents and relative major/minor pairs."
+            "collapsing enharmonic equivalents while keeping major/minor separate."
         )
     )
     parser.add_argument(

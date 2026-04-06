@@ -13,7 +13,7 @@
 #SBATCH --ntasks-per-node=1
 
 # Request the GPU partition
-#SBATCH --partition=l40s_nova
+#SBATCH --partition=h200
 
 # Request the GPU partition
 #SBATCH --gpus=1
@@ -29,7 +29,7 @@ source /optnfs/common/miniconda3/etc/profile.d/conda.sh
 cd /dartfs/rc/lab/S/SinghN/matt/MADlibs
 
 conda activate musicgen
-python run_generation.py generator=musicgen prompt_strategy=madlibs_pcfg run.output_dir=MADLibs_output hydra.run.dir=/dartfs/rc/lab/S/SinghN/shared
+python run_generation.py generator=musicgen prompt_strategy=madlibs_pcfg generator.batch_size=32 run.output_dir=MADLibs_output hydra.run.dir=/dartfs/rc/lab/S/SinghN/shared
 
 conda deactivate
 conda activate acestep

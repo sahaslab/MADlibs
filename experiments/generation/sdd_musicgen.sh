@@ -13,13 +13,13 @@
 #SBATCH --ntasks-per-node=1
 
 # Request the GPU partition
-#SBATCH --partition=l40s_nova
+#SBATCH --partition=h200
 
 # Request the GPU partition
 #SBATCH --gpus=1
 
 # Walltime (job duration)
-#SBATCH --time=5:00:00
+#SBATCH --time=10:00:00
 
 # Request CPU memory 
 #SBATCH --mem-per-cpu 300GB

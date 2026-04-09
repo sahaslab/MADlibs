@@ -1,0 +1,4 @@
+defaults:
+  - _base
+
+_target_: madlibs.generation.real.Real

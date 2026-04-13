@@ -17,6 +17,7 @@ run:
   overwrite_prompts: false
   audio_glob: ${run.generated_audio_dir}/*/*/*.wav
   prompt_filename: prompt.txt
+  max_prompts: null
 hydra:
   run:
     dir: ${hydra:runtime.cwd}/results

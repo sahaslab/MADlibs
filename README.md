@@ -113,7 +113,7 @@ Command:
 Lyria can be run with:
 `python run_generation.py generator=lyria`
 
-This generator uses Google Lyria 3 through the `google-genai` `generate_content` API. The default config targets `lyria-3-pro-preview`, enforces instrumental-only output, and writes configured `.wav` files for each prompt. Set either `GOOGLE_API_KEY` or `GEMINI_API_KEY` before running.
+This generator uses Google Lyria 3 through the `google-genai` `generate_content` API. The default config targets `lyria-3-pro-preview`, enforces instrumental-only output, and writes configured audio files for each prompt, converting the native response when needed for `.wav` compatibility. Set either `GOOGLE_API_KEY` or `GEMINI_API_KEY` before running.
 
 ## Formatting
 Please format code contributions by running `ruff format`.

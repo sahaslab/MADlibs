@@ -282,18 +282,11 @@ class Lyria(MusicGenerator):
         )
 
     def _build_generation_config(self, types_module: Any, model_id: str) -> Any | None:
-        config_kwargs: dict[str, Any] = {}
-        if self.audio_format == "wav" and self._is_pro_model(model_id):
-            config_kwargs["response_modalities"] = ["AUDIO", "TEXT"]
-            config_kwargs["response_mime_type"] = "audio/wav"
-
-        if not config_kwargs:
-            return None
-
-        config_cls = getattr(types_module, "GenerateContentConfig", None)
-        if config_cls is None:
-            return config_kwargs
-        return config_cls(**config_kwargs)
+        del types_module
+        del model_id
+        # Lyria 3 returns audio by default. Avoid response_mime_type here because
+        # current Gemini API deployments may reject non-text mime types.
+        return None
 
     def _extract_response_parts(self, response: Any) -> tuple[list[str], bytes, str]:
         parts = list(getattr(response, "parts", None) or [])
@@ -486,8 +479,6 @@ class Lyria(MusicGenerator):
         return None
 
     def _default_response_mime(self) -> str:
-        if self.audio_format == "wav" and self._is_pro_model(self.model_id):
-            return "audio/wav"
         return "audio/mp3"
 
     def _format_duration(self, seconds: float) -> str:

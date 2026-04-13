@@ -2,17 +2,18 @@ defaults:
   - _base
 
 _target_: madlibs.generation.lyria.Lyria
-model_id: models/lyria-realtime-exp
-api_version: v1alpha
+model_id: lyria-3-pro-preview
+api_version: v1beta
 api_key: null
 output_seconds: 90.0
-receive_timeout_seconds: 120.0
+receive_timeout_seconds: 180.0
 prompt_weight: 1.0
 sample_rate: 48000
 channels: 2
 sample_width_bytes: 2
 audio_format: wav
 device: cpu
+num_workers: 4
 config:
   temperature: 1.1
   top_k: 40

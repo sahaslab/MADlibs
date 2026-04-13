@@ -2,6 +2,7 @@ import base64
 import dataclasses
 import importlib
 import io
+import json
 import os
 from typing import Any
 
@@ -29,6 +30,7 @@ class Lyria(MusicGenerator):
     NATIVE_CHANNELS = 2
     MAX_PRO_SECONDS = 240.0
     RESPONSE_TEXT_FILENAME = "response.txt"
+    RESPONSE_DEBUG_FILENAME = "response_debug.json"
 
     def __init__(
         self,
@@ -71,6 +73,9 @@ class Lyria(MusicGenerator):
         else:
             self.config = LyriaGenerationConfig(**config)
 
+        self._validate_config()
+
+    def _validate_config(self) -> None:
         if self.output_seconds <= 0:
             raise ValueError("output_seconds must be positive.")
         if (
@@ -96,24 +101,14 @@ class Lyria(MusicGenerator):
                 "only_bass_and_drums cannot be combined with mute_bass or mute_drums."
             )
         if (self.config.music_generation_mode or "").upper() == "VOCALIZATION":
-            raise ValueError(
-                "The Lyria 3 replacement only supports instrumental generation."
-            )
-        if (
-            self._is_clip_model(self.model_id)
-            and abs(self.output_seconds - 30.0) > 1e-6
-        ):
+            raise ValueError("The Lyria 3 generator only supports instrumental audio.")
+        if self._is_clip_model() and abs(self.output_seconds - 30.0) > 1e-6:
             raise ValueError(
                 "lyria-3-clip-preview always returns 30-second clips. "
                 "Use lyria-3-pro-preview for other durations."
             )
-        if (
-            self._is_pro_model(self.model_id)
-            and self.output_seconds > self.MAX_PRO_SECONDS
-        ):
-            raise ValueError(
-                "lyria-3-pro-preview supports tracks up to 240 seconds."
-            )
+        if self._is_pro_model() and self.output_seconds > self.MAX_PRO_SECONDS:
+            raise ValueError("lyria-3-pro-preview supports tracks up to 240 seconds.")
 
     def _get_init_kwargs(self) -> dict[str, Any]:
         return {
@@ -133,7 +128,10 @@ class Lyria(MusicGenerator):
         }
 
     def _generate_audio(self, prompt: str, save_path: str) -> str:
-        lyrics, audio_bytes, source_mime = self._generate_response(prompt=prompt)
+        lyrics, audio_bytes, source_mime = self._request_track(
+            prompt=prompt,
+            save_path=save_path,
+        )
 
         if lyrics:
             self._write_response_text(save_path=save_path, lyrics=lyrics)
@@ -146,35 +144,22 @@ class Lyria(MusicGenerator):
         )
         return output_path
 
-    def _generate_response(self, prompt: str) -> tuple[list[str], bytes, str]:
+    def _request_track(self, prompt: str, save_path: str) -> tuple[list[str], bytes, str]:
         genai_module, types_module = self._load_sdk()
-        client = self._build_client(
-            genai_module=genai_module,
-            types_module=types_module,
-        )
-        request_prompt = self._build_generation_prompt(prompt=prompt)
-        generation_config = self._build_generation_config(
-            types_module=types_module,
-            model_id=self.model_id,
-        )
+        client = self._build_client(genai_module=genai_module, types_module=types_module)
 
         try:
-            if generation_config is None:
-                response = client.models.generate_content(
-                    model=self.model_id,
-                    contents=request_prompt,
-                )
-            else:
-                response = client.models.generate_content(
-                    model=self.model_id,
-                    contents=request_prompt,
-                    config=generation_config,
-                )
-            return self._extract_response_parts(response=response)
+            response = client.models.generate_content(
+                model=self.model_id,
+                contents=self._build_generation_prompt(prompt),
+                config=self._build_generation_config(types_module),
+            )
         finally:
             close_fn = getattr(client, "close", None)
             if callable(close_fn):
                 close_fn()
+
+        return self._parse_response(response=response, save_path=save_path)
 
     def _load_sdk(self) -> tuple[Any, Any]:
         try:
@@ -199,8 +184,8 @@ class Lyria(MusicGenerator):
             )
 
         client_kwargs: dict[str, Any] = {"api_key": api_key}
+        http_options_cls = getattr(types_module, "HttpOptions", None)
         if self.api_version:
-            http_options_cls = getattr(types_module, "HttpOptions", None)
             if http_options_cls is None:
                 client_kwargs["http_options"] = {"api_version": self.api_version}
             else:
@@ -210,13 +195,13 @@ class Lyria(MusicGenerator):
         return genai_module.Client(**client_kwargs)
 
     def _resolve_api_key(self) -> str | None:
-        if self.api_key is not None:
+        if self.api_key:
             return self.api_key
 
         for env_var in self.api_key_env_vars:
-            if env_var in os.environ and os.environ[env_var]:
-                return os.environ[env_var]
-
+            value = os.environ.get(env_var)
+            if value:
+                return value
         return None
 
     def _build_generation_prompt(self, prompt: str) -> str:
@@ -224,113 +209,138 @@ class Lyria(MusicGenerator):
         if not prompt:
             raise ValueError("Prompt must not be empty.")
 
-        controls = [
+        instructions = [
             self._duration_instruction(),
             "Generate instrumental music only.",
             "Do not include vocals, lyrics, singing, chanting, choir, or spoken word.",
         ]
 
         if self.config.only_bass_and_drums:
-            controls.append("Limit the arrangement to bass and drums/percussion only.")
+            instructions.append("Use only bass and drums/percussion.")
         else:
             if self.config.mute_bass:
-                controls.append("Avoid bass instruments.")
+                instructions.append("Do not use bass instruments.")
             if self.config.mute_drums:
-                controls.append("Avoid drums and percussion.")
+                instructions.append("Do not use drums or percussion.")
 
         if self.config.bpm is not None:
-            controls.append(f"Target tempo: about {self.config.bpm} BPM.")
+            instructions.append(f"Target tempo: about {self.config.bpm} BPM.")
+        if self.config.scale:
+            instructions.append(
+                f"Prefer the tonal center or scale {self._humanize_scale(self.config.scale)}."
+            )
         if self.config.density is not None:
-            controls.append(
-                "Arrangement density: %s." % (self._describe_density(self.config.density))
+            instructions.append(
+                f"Arrangement density: {self._describe_density(self.config.density)}."
             )
         if self.config.brightness is not None:
-            controls.append(
-                "Overall timbre: %s." % (self._describe_brightness(self.config.brightness))
-            )
-        if self.config.scale:
-            controls.append(
-                "Prefer the tonal center or scale %s."
-                % (self._humanize_scale(self.config.scale))
+            instructions.append(
+                f"Tonal brightness: {self._describe_brightness(self.config.brightness)}."
             )
 
         mode = (self.config.music_generation_mode or "").upper()
         if mode == "QUALITY":
-            controls.append("Prioritize polish, cohesion, and production quality.")
+            instructions.append("Prioritize polish and cohesion.")
         elif mode == "DIVERSITY":
-            controls.append("Favor variety and evolving motifs over repetition.")
+            instructions.append("Favor variety and evolving sections.")
 
         return "\n".join(
             [
-                "Follow every instruction below when generating this track.",
-                *controls,
+                "Follow all of these instructions when creating the track.",
+                *instructions,
                 "Creative direction:",
                 prompt,
             ]
         )
 
     def _duration_instruction(self) -> str:
-        if self._is_clip_model(self.model_id):
+        if self._is_clip_model():
             return "Create a 30-second clip."
 
         return (
-            "Create a complete track that lasts about %s and ends naturally by %s."
+            "Create a complete track that lasts about %s and resolves naturally by %s."
             % (
                 self._format_duration(self.output_seconds),
                 self._format_timestamp(self.output_seconds),
             )
         )
 
-    def _build_generation_config(self, types_module: Any, model_id: str) -> Any | None:
-        del types_module
-        del model_id
-        # Lyria 3 returns audio by default. Avoid response_mime_type here because
-        # current Gemini API deployments may reject non-text mime types.
-        return None
+    def _build_generation_config(self, types_module: Any) -> Any:
+        config_kwargs = {"response_modalities": ["AUDIO", "TEXT"]}
+        config_cls = getattr(types_module, "GenerateContentConfig", None)
+        if config_cls is None:
+            return config_kwargs
+        return config_cls(**config_kwargs)
 
-    def _extract_response_parts(self, response: Any) -> tuple[list[str], bytes, str]:
-        parts = list(getattr(response, "parts", None) or [])
-        if not parts:
-            candidates = getattr(response, "candidates", None) or []
-            for candidate in candidates:
-                content = getattr(candidate, "content", None)
-                parts.extend(getattr(content, "parts", None) or [])
-
+    def _parse_response(
+        self, response: Any, save_path: str
+    ) -> tuple[list[str], bytes, str]:
         lyrics: list[str] = []
         audio_bytes: bytes | None = None
         audio_mime: str | None = None
 
-        for part in parts:
+        for part in self._iter_response_parts(response):
             text = getattr(part, "text", None)
-            if text is not None:
-                stripped_text = text.strip()
-                if stripped_text:
-                    lyrics.append(stripped_text)
+            if isinstance(text, str) and text.strip():
+                lyrics.append(text.strip())
                 continue
 
-            inline_data = getattr(part, "inline_data", None)
-            if inline_data is None:
-                inline_data = getattr(part, "inlineData", None)
+            inline_data = getattr(part, "inline_data", None) or getattr(
+                part, "inlineData", None
+            )
             if inline_data is None:
                 continue
 
-            part_bytes = getattr(inline_data, "data", None)
-            if isinstance(part_bytes, str):
-                part_bytes = base64.b64decode(part_bytes)
-            if part_bytes is None:
+            data = getattr(inline_data, "data", None)
+            if data is None:
                 continue
 
-            audio_bytes = bytes(part_bytes)
+            if isinstance(data, str):
+                data = base64.b64decode(data)
+
+            audio_bytes = bytes(data)
             audio_mime = getattr(inline_data, "mime_type", None) or getattr(
                 inline_data, "mimeType", None
             )
 
         if audio_bytes is None:
-            raise RuntimeError("Lyria 3 returned no audio data for the prompt.")
+            self._write_response_debug(save_path=save_path, response=response)
+            raise RuntimeError(
+                "Lyria 3 returned no audio data for the prompt. "
+                "Saved response details to %s."
+                % (os.path.join(save_path, self.RESPONSE_DEBUG_FILENAME))
+            )
 
-        if audio_mime is None:
-            audio_mime = self._default_response_mime()
-        return lyrics, audio_bytes, audio_mime
+        return lyrics, audio_bytes, audio_mime or "audio/mp3"
+
+    def _iter_response_parts(self, response: Any) -> list[Any]:
+        parts = list(getattr(response, "parts", None) or [])
+        if parts:
+            return parts
+
+        candidates = list(getattr(response, "candidates", None) or [])
+        if not candidates:
+            return []
+
+        content = getattr(candidates[0], "content", None)
+        return list(getattr(content, "parts", None) or [])
+
+    def _write_response_debug(self, save_path: str, response: Any) -> None:
+        payload = self._serialize_response(response)
+        output_path = os.path.join(save_path, self.RESPONSE_DEBUG_FILENAME)
+        with open(output_path, "w", encoding="utf-8") as file_obj:
+            json.dump(payload, file_obj, indent=2, ensure_ascii=True, default=repr)
+            file_obj.write("\n")
+
+    def _serialize_response(self, response: Any) -> Any:
+        for method_name in ("model_dump", "to_json_dict"):
+            method = getattr(response, method_name, None)
+            if callable(method):
+                try:
+                    return method()
+                except TypeError:
+                    continue
+        return repr(response)
 
     def _write_response_text(self, save_path: str, lyrics: list[str]) -> None:
         output_path = os.path.join(save_path, self.RESPONSE_TEXT_FILENAME)
@@ -341,22 +351,7 @@ class Lyria(MusicGenerator):
         self, output_path: str, audio_bytes: bytes, source_mime: str
     ) -> None:
         if self.audio_format == "mp3":
-            if source_mime != "audio/mp3":
-                raise ValueError(
-                    "mp3 output requires Lyria 3 to return mp3 audio, got `%s`."
-                    % (source_mime)
-                )
-            if (
-                self.sample_rate != self.NATIVE_SAMPLE_RATE
-                or self.channels != self.NATIVE_CHANNELS
-            ):
-                raise ValueError(
-                    "mp3 output can only be used with the native 44.1kHz stereo "
-                    "settings. Use audio_format=wav for custom sample rate or "
-                    "channel conversion."
-                )
-            with open(output_path, "wb") as file_obj:
-                file_obj.write(audio_bytes)
+            self._write_mp3(output_path=output_path, audio_bytes=audio_bytes)
             return
 
         waveform, sample_rate = self._decode_audio_bytes(
@@ -372,11 +367,24 @@ class Lyria(MusicGenerator):
                 new_freq=self.sample_rate,
             )
             sample_rate = self.sample_rate
+
         self._write_wav(
             output_path=output_path,
             waveform=waveform,
             sample_rate=sample_rate,
         )
+
+    def _write_mp3(self, output_path: str, audio_bytes: bytes) -> None:
+        if (
+            self.sample_rate != self.NATIVE_SAMPLE_RATE
+            or self.channels != self.NATIVE_CHANNELS
+        ):
+            raise ValueError(
+                "mp3 output can only be used with native 44.1kHz stereo settings. "
+                "Use audio_format=wav for sample-rate or channel conversion."
+            )
+        with open(output_path, "wb") as file_obj:
+            file_obj.write(audio_bytes)
 
     def _decode_audio_bytes(
         self, audio_bytes: bytes, source_mime: str
@@ -390,7 +398,7 @@ class Lyria(MusicGenerator):
             ) from error
 
         audio_buffer = io.BytesIO(audio_bytes)
-        format_hint = self._mime_to_format(source_mime)
+        format_hint = "mp3" if source_mime in {"audio/mp3", "audio/mpeg"} else "wav"
         try:
             waveform, sample_rate = torchaudio.load(audio_buffer, format=format_hint)
         except TypeError:
@@ -470,17 +478,6 @@ class Lyria(MusicGenerator):
     def _humanize_scale(self, scale: str) -> str:
         return scale.replace("_", " ").title()
 
-    def _mime_to_format(self, mime_type: str) -> str | None:
-        mime_type = mime_type.lower()
-        if mime_type == "audio/wav":
-            return "wav"
-        if mime_type in {"audio/mp3", "audio/mpeg"}:
-            return "mp3"
-        return None
-
-    def _default_response_mime(self) -> str:
-        return "audio/mp3"
-
     def _format_duration(self, seconds: float) -> str:
         total_seconds = max(1, int(round(seconds)))
         minutes, remaining_seconds = divmod(total_seconds, 60)
@@ -497,8 +494,8 @@ class Lyria(MusicGenerator):
         minutes, remaining_seconds = divmod(total_seconds, 60)
         return f"{minutes}:{remaining_seconds:02d}"
 
-    def _is_clip_model(self, model_id: str) -> bool:
-        return "lyria-3-clip" in model_id.lower()
+    def _is_clip_model(self) -> bool:
+        return "lyria-3-clip" in self.model_id.lower()
 
-    def _is_pro_model(self, model_id: str) -> bool:
-        return "lyria-3-pro" in model_id.lower()
+    def _is_pro_model(self) -> bool:
+        return "lyria-3-pro" in self.model_id.lower()

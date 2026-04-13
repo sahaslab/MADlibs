@@ -1,7 +1,6 @@
 from hydra.utils import instantiate
 from madlibs.generation.base import MusicGenerator
 
-
 def generate_model_outputs(
     generator_cfg: dict,
     prompts: list[str],

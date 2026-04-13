@@ -4,7 +4,10 @@ import importlib
 import io
 import json
 import os
+import tempfile
 from typing import Any
+
+import numpy as np
 
 from madlibs.generation.base import MusicGenerator
 
@@ -360,11 +363,12 @@ class Lyria(MusicGenerator):
         )
         waveform = self._convert_channels(waveform)
         if sample_rate != self.sample_rate:
-            torchaudio = importlib.import_module("torchaudio")
-            waveform = torchaudio.functional.resample(
+            librosa = importlib.import_module("librosa")
+            waveform = librosa.resample(
                 waveform,
-                orig_freq=sample_rate,
-                new_freq=self.sample_rate,
+                orig_sr=sample_rate,
+                target_sr=self.sample_rate,
+                axis=-1,
             )
             sample_rate = self.sample_rate
 
@@ -390,38 +394,58 @@ class Lyria(MusicGenerator):
         self, audio_bytes: bytes, source_mime: str
     ) -> tuple[Any, int]:
         try:
-            torchaudio = importlib.import_module("torchaudio")
-            torch = importlib.import_module("torch")
+            soundfile = importlib.import_module("soundfile")
         except ImportError as error:
             raise ImportError(
-                "torchaudio and torch are required to decode Lyria 3 audio."
+                "soundfile is required to decode Lyria 3 audio."
             ) from error
 
-        audio_buffer = io.BytesIO(audio_bytes)
-        format_hint = "mp3" if source_mime in {"audio/mp3", "audio/mpeg"} else "wav"
         try:
-            waveform, sample_rate = torchaudio.load(audio_buffer, format=format_hint)
-        except TypeError:
-            audio_buffer.seek(0)
-            waveform, sample_rate = torchaudio.load(audio_buffer)
+            waveform, sample_rate = soundfile.read(
+                io.BytesIO(audio_bytes),
+                dtype="float32",
+                always_2d=True,
+            )
+            return waveform.T, int(sample_rate)
+        except Exception:
+            pass
 
+        try:
+            librosa = importlib.import_module("librosa")
+        except ImportError as error:
+            raise ImportError(
+                "librosa is required to decode compressed Lyria 3 audio when "
+                "soundfile cannot read it directly."
+            ) from error
+
+        suffix = ".mp3" if source_mime in {"audio/mp3", "audio/mpeg"} else ".wav"
+        with tempfile.NamedTemporaryFile(suffix=suffix, delete=True) as file_obj:
+            file_obj.write(audio_bytes)
+            file_obj.flush()
+            waveform, sample_rate = librosa.load(
+                file_obj.name,
+                sr=None,
+                mono=False,
+            )
+
+        waveform = np.asarray(waveform, dtype=np.float32)
         if waveform.ndim == 1:
-            waveform = waveform.unsqueeze(0)
-        return waveform.to(torch.float32), int(sample_rate)
+            waveform = waveform[np.newaxis, :]
+        return waveform, int(sample_rate)
 
     def _convert_channels(self, waveform: Any) -> Any:
         current_channels = int(waveform.shape[0])
         if current_channels == self.channels:
             return waveform
         if self.channels == 1:
-            return waveform.mean(dim=0, keepdim=True)
+            return waveform.mean(axis=0, keepdims=True)
         if current_channels == 1:
-            return waveform.repeat(self.channels, 1)
+            return np.repeat(waveform, self.channels, axis=0)
         if current_channels >= self.channels:
             return waveform[: self.channels, :]
 
-        mono = waveform.mean(dim=0, keepdim=True)
-        return mono.repeat(self.channels, 1)
+        mono = waveform.mean(axis=0, keepdims=True)
+        return np.repeat(mono, self.channels, axis=0)
 
     def _write_wav(self, output_path: str, waveform: Any, sample_rate: int) -> None:
         try:
@@ -433,7 +457,7 @@ class Lyria(MusicGenerator):
 
         soundfile.write(
             output_path,
-            waveform.transpose(0, 1).cpu().numpy(),
+            waveform.T,
             sample_rate,
             format="WAV",
             subtype=self._wav_subtype(),

@@ -3,7 +3,7 @@ from madlibs.mir.base import MIRAnalysis
 
 
 class TimeSignature(MIRAnalysis):
-    def process_audio(self, data) -> dict[str, float]:
+    def process_audio(self, data) -> dict[str, float | None]:
         """
         Time signature is hard to do, we can do a best effort by taking the median count of beats between each downbeat (+ 1)
 
@@ -16,17 +16,19 @@ class TimeSignature(MIRAnalysis):
         """
         beats, downbeats = data
 
+        if len(beats) == 0 or len(downbeats) == 0:
+            return {"time_signature": None}
+
         beat_counts = []
         beat_idx = 0
 
         for down in downbeats:
             count = 0
-            while beats[beat_idx] < down:
+            while beat_idx < len(beats) and beats[beat_idx] < down:
                 count += 1
                 beat_idx += 1
 
             beat_counts.append(count)
 
-        # Return median
         beat_counts.sort()
         return {"time_signature": beat_counts[len(beat_counts) // 2]}

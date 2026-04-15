@@ -19,7 +19,7 @@ class Tempo(MIRAnalysis):
         _, downbeats = data
 
         if len(downbeats) < 2:
-            return {"tempo": None}
+            return {"tempo": 0}
 
         framewise_dbpm = []
         for i in range(len(downbeats) - 1):

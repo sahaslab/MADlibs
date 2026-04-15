@@ -17,7 +17,7 @@ class TimeSignature(MIRAnalysis):
         beats, downbeats = data
 
         if len(beats) == 0 or len(downbeats) == 0:
-            return {"time_signature": None}
+            return {"time_signature": 0}
 
         beat_counts = []
         beat_idx = 0

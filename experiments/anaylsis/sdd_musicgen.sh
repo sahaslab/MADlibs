@@ -1,9 +1,9 @@
 #!/bin/bash
 
 # Name of the job
-#SBATCH --job-name=analysis_madlibs_templates_acestep
-#SBATCH --output=logs/analysis_madlibs_templates_acestep_%j.out
-#SBATCH --error=logs/analysis_madlibs_templates_acestep_%j.err
+#SBATCH --job-name=sdd_music_gen
+#SBATCH --output=logs/analysis_sdd_music_gen_%j.out
+#SBATCH --error=logs/analysis_sdd_music_gen_%j.err
 
 # Account info
 #SBATCH --account=sahaslab-gpu
@@ -15,7 +15,7 @@
 #SBATCH --ntasks-per-node=1
 
 # Request the GPU partition
-#SBATCH --partition=l40s_nova
+#SBATCH --partition=h200_preemptable
 
 # Request the GPU partition
 #SBATCH --gpus=1

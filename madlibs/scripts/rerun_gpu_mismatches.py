@@ -140,7 +140,7 @@ def stage_subset(
         target_dir = subset_dir / f"{index:05d}"
         target_dir.mkdir(parents=True, exist_ok=False)
 
-        staged_audio = target_dir / audio_path.name
+        staged_audio = target_dir / f"audio{audio_path.suffix}"
         staged_prompt = target_dir / prompt_filename
 
         os.symlink(audio_path, staged_audio)
@@ -157,7 +157,7 @@ def build_command(
         sys.executable,
         str(repo_root / "run_mir.py"),
         "analysis_type=gpu",
-        f"run.audio_glob={subset_dir}/*/*.[wm][ap][v3]",
+        f"run.audio_glob={subset_dir}/*/audio*",
         f"analysis_type.output_filename={output_path}",
     ]
     command.extend(hydra_args)

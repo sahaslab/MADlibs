@@ -96,6 +96,13 @@ def find_mismatches(
     return sorted(mismatch_keys)
 
 
+def find_missing_from_right(
+    left_records: dict[str, dict[str, Any]],
+    right_records: dict[str, dict[str, Any]],
+) -> list[str]:
+    return sorted(set(left_records) - set(right_records))
+
+
 def normalize_record(record: dict[str, Any]) -> str:
     return json.dumps(record, sort_keys=True, separators=(",", ":"), ensure_ascii=False)
 
@@ -150,7 +157,7 @@ def build_command(
         sys.executable,
         str(repo_root / "run_mir.py"),
         "analysis_type=gpu",
-        f"run.audio_glob={subset_dir}/*/*.*",
+        f"run.audio_glob={subset_dir}/*/*.[wm][ap][v3]",
         f"analysis_type.output_filename={output_path}",
     ]
     command.extend(hydra_args)
@@ -194,11 +201,19 @@ def parse_args() -> argparse.Namespace:
         help="Print mismatches and planned command without running analysis",
     )
     parser.add_argument(
-        "hydra_args",
-        nargs=argparse.REMAINDER,
-        help="Extra Hydra overrides to pass through after '--'",
+        "--mode",
+        choices=["missing_from_file2", "mismatched", "different_or_missing"],
+        default="missing_from_file2",
+        help=(
+            "How to select rerun files. Default reruns files present in file1 but "
+            "missing from file2."
+        ),
     )
-    return parser.parse_args()
+    args, hydra_args = parser.parse_known_args()
+    if hydra_args and hydra_args[0] == "--":
+        hydra_args = hydra_args[1:]
+    args.hydra_args = hydra_args
+    return args
 
 
 def main() -> None:
@@ -209,14 +224,20 @@ def main() -> None:
     output_path = resolve_path(args.output, base_dir)
 
     hydra_args = list(args.hydra_args)
-    if hydra_args and hydra_args[0] == "--":
-        hydra_args = hydra_args[1:]
 
     left_records = load_records(file1)
     right_records = load_records(file2)
-    mismatch_keys = find_mismatches(left_records, right_records)
+    if args.mode == "missing_from_file2":
+        mismatch_keys = find_missing_from_right(left_records, right_records)
+        summary_label = "missing from file2"
+    elif args.mode == "mismatched":
+        mismatch_keys = find_mismatches(left_records, right_records)
+        summary_label = "mismatching"
+    else:
+        mismatch_keys = find_mismatches(left_records, right_records)
+        summary_label = "different or missing"
 
-    print(f"Found {len(mismatch_keys)} mismatching audio files")
+    print(f"Found {len(mismatch_keys)} audio files {summary_label}")
     if mismatch_keys:
         preview = "\n".join(f"  {key}" for key in mismatch_keys[:20])
         print(preview)

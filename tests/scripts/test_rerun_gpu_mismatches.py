@@ -3,6 +3,7 @@ from pathlib import Path
 
 from madlibs.scripts.rerun_gpu_mismatches import (
     find_mismatches,
+    find_missing_from_right,
     load_records,
     resolve_path,
 )
@@ -19,6 +20,19 @@ def test_find_mismatches_includes_missing_and_changed_records():
     }
 
     assert find_mismatches(left, right) == ["a.wav", "b.wav", "c.wav"]
+
+
+def test_find_missing_from_right_only_returns_missing_keys():
+    left = {
+        "a.wav": {"metadata": {"audio_filename": "a.wav"}, "tempo": 120},
+        "b.wav": {"metadata": {"audio_filename": "b.wav"}, "tempo": 100},
+    }
+    right = {
+        "a.wav": {"metadata": {"audio_filename": "a.wav"}, "tempo": 999},
+        "c.wav": {"metadata": {"audio_filename": "c.wav"}, "tempo": 90},
+    }
+
+    assert find_missing_from_right(left, right) == ["b.wav"]
 
 
 def test_load_records_supports_top_level_audio_filename_in_json(tmp_path: Path):

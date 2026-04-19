@@ -125,7 +125,8 @@ def stage_subset(
     base_dir: Path,
     prompt_filename: str,
     subset_dir: Path,
-) -> None:
+) -> dict[str, str]:
+    staged_to_original: dict[str, str] = {}
     for index, audio_filename in enumerate(audio_filenames):
         audio_path = resolve_path(audio_filename, base_dir)
         if not audio_path.exists():
@@ -145,6 +146,46 @@ def stage_subset(
 
         os.symlink(audio_path, staged_audio)
         os.symlink(prompt_path, staged_prompt)
+        staged_to_original[str(staged_audio)] = audio_filename
+
+    return staged_to_original
+
+
+def rewrite_output_audio_filenames(
+    output_path: Path,
+    staged_to_original: dict[str, str],
+) -> None:
+    rewritten_lines: list[str] = []
+    with output_path.open("r", encoding="utf-8") as file_obj:
+        for line_num, line in enumerate(file_obj, start=1):
+            line = line.strip()
+            if not line:
+                continue
+            record = json.loads(line)
+            metadata = record.get("metadata")
+            if not isinstance(metadata, dict):
+                raise ValueError(
+                    f"Record on line {line_num} of {output_path} is missing metadata"
+                )
+
+            staged_audio_filename = metadata.get("audio_filename")
+            if not isinstance(staged_audio_filename, str):
+                raise ValueError(
+                    f"Record on line {line_num} of {output_path} is missing "
+                    "metadata.audio_filename"
+                )
+
+            original_audio_filename = staged_to_original.get(staged_audio_filename)
+            if original_audio_filename is None:
+                raise ValueError(
+                    f"Unexpected staged audio path on line {line_num} of "
+                    f"{output_path}: {staged_audio_filename}"
+                )
+
+            metadata["audio_filename"] = original_audio_filename
+            rewritten_lines.append(json.dumps(record, ensure_ascii=False))
+
+    output_path.write_text("\n".join(rewritten_lines) + "\n", encoding="utf-8")
 
 
 def build_command(
@@ -254,7 +295,7 @@ def main() -> None:
 
     with tempfile.TemporaryDirectory(prefix="gpu_rerun_subset_") as temp_dir:
         subset_dir = Path(temp_dir)
-        stage_subset(
+        staged_to_original = stage_subset(
             audio_filenames=mismatch_keys,
             base_dir=base_dir,
             prompt_filename=args.prompt_filename,
@@ -275,6 +316,7 @@ def main() -> None:
 
         output_path.parent.mkdir(parents=True, exist_ok=True)
         subprocess.run(command, check=True, cwd=repo_root)
+        rewrite_output_audio_filenames(output_path, staged_to_original)
 
         print(f"Wrote rerun GPU analysis to {output_path}")
 

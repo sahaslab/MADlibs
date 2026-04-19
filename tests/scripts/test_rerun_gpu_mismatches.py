@@ -6,6 +6,8 @@ from madlibs.scripts.rerun_gpu_mismatches import (
     find_missing_from_right,
     load_records,
     resolve_path,
+    rewrite_output_audio_filenames,
+    stage_subset,
 )
 
 
@@ -56,3 +58,36 @@ def test_resolve_path_prefers_base_dir_for_missing_relative_path(tmp_path: Path)
     resolved = resolve_path("audio/song.wav", tmp_path)
 
     assert resolved == nested.resolve()
+
+
+def test_stage_subset_and_rewrite_output_restore_original_audio_filename(
+    tmp_path: Path,
+):
+    source_dir = tmp_path / "source"
+    source_dir.mkdir()
+    audio_path = source_dir / "song.wav"
+    prompt_path = source_dir / "prompt.txt"
+    audio_path.write_text("audio", encoding="utf-8")
+    prompt_path.write_text("prompt", encoding="utf-8")
+
+    subset_dir = tmp_path / "subset"
+    subset_dir.mkdir()
+    staged_to_original = stage_subset(
+        audio_filenames=["source/song.wav"],
+        base_dir=tmp_path,
+        prompt_filename="prompt.txt",
+        subset_dir=subset_dir,
+    )
+
+    staged_audio = next(iter(staged_to_original))
+    output_path = tmp_path / "gpu_analysis_rerun.jsonl"
+    output_record = {
+        "metadata": {"audio_filename": staged_audio},
+        "tempo": 120,
+    }
+    output_path.write_text(json.dumps(output_record) + "\n", encoding="utf-8")
+
+    rewrite_output_audio_filenames(output_path, staged_to_original)
+
+    rewritten = load_records(output_path)
+    assert list(rewritten) == ["source/song.wav"]

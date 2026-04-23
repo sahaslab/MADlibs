@@ -15,7 +15,9 @@ class BeatPipeline:
         self,
         audio_filename: str,
         metadata: dict[str, Any] | None = None,
+        prompt_filename: str | None = None,
     ) -> dict[str, Any]:
+        del prompt_filename
         if metadata is None:
             metadata = {}
         metadata["audio_filename"] = audio_filename

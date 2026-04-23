@@ -24,3 +24,13 @@ gpu_pipeline:
   clap_analyses:
     - _target_: madlibs.mir.clap_similarity.CLAPSimilarity
       model_id: laion/clap-htsat-fused
+
+beat_pipeline:
+  _target_: madlibs.mir.beat_pipeline.BeatPipeline
+  beat_tracker:
+    _target_: madlibs.mir.beat_tracker.BeatThisTracker
+    checkpoint_path: final0
+    dbn: false
+  beat_analyses:
+    - _target_: madlibs.mir.beats.Beats
+

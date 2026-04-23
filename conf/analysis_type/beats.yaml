@@ -1,0 +1,2 @@
+pipeline_key: beat_pipeline
+output_filename: ${run.analysis_output_dir}/beat_results.jsonl

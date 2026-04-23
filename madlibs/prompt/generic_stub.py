@@ -7,7 +7,7 @@ logger = logging.getLogger(__name__)
 
 
 @dataclasses.dataclass
-class JamendoStub(PromptStrategy):
+class GenericStub(PromptStrategy):
     """
     Stub to run generation on (existing) SDD prompts. Doesn't do anything
     """

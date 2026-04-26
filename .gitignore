@@ -4,6 +4,7 @@ results/
 multirun/
 .hydra/
 .vscode/
+analysis/analysis_data
 
 # ignore wav files
 *.wav

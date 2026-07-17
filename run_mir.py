@@ -40,7 +40,7 @@ def main(cfg: DictConfig):
                     audio_filename=audio_path, prompt_filename=prompt_path
                 )
             except Exception as error:
-                logger.error(f"Error processing {audio_path}: {error}")
+                logger.exception("Error processing %s: %s", audio_path, error)
                 continue
 
             serializable = {

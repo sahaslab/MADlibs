@@ -3,7 +3,7 @@ import hydra
 from hydra.utils import instantiate
 from omegaconf import DictConfig
 from madlibs.generation.base import MusicGenerator
-
+import random 
 
 @hydra.main(version_base=None, config_path="conf", config_name="config")
 def main(cfg: DictConfig):
@@ -22,6 +22,8 @@ def main(cfg: DictConfig):
             f"generator must instantiate MusicGenerator, got: {type(generator)}"
         )
 
+    if cfg.run.max_prompts is not None and len(prompts)>cfg.run.max_prompts:
+        prompts = random.sample(prompts,cfg.run.max_prompts)
     os.makedirs(cfg.run.generated_audio_dir, exist_ok=True)
     run_dir = generator.generate(
         prompts=prompts, output_dir=cfg.run.generated_audio_dir

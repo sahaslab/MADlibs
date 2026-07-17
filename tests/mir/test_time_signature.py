@@ -3,9 +3,7 @@ import os
 
 sys.path.append(os.path.join(os.path.dirname(__file__), "../.."))
 import pytest
-import librosa
 import torch
-from beat_this.inference import File2Beats
 from madlibs.mir.time_signature import TimeSignature
 
 
@@ -23,6 +21,7 @@ def test_time_signature():
 
 def test_time_signature_on_ace_step():
     t = TimeSignature()
+    File2Beats = pytest.importorskip("beat_this.inference").File2Beats
     # Hack fix for beat this torch error
     if not hasattr(torch.amp, "is_autocast_available"):
 
@@ -37,3 +36,10 @@ def test_time_signature_on_ace_step():
     beats, downbeats = file2beats("tests/mir/ace_step_test.wav")
     output = t.process_audio(data=(beats, downbeats))
     assert output["time_signature"] == 4
+
+
+def test_time_signature_returns_none_for_sparse_beats():
+    t = TimeSignature()
+
+    assert t.process_audio(data=([], [])) == {"time_signature": None}
+    assert t.process_audio(data=([], [1.0])) == {"time_signature": None}

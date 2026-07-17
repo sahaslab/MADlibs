@@ -2,7 +2,7 @@ from madlibs.mir.base import MIRAnalysis
 
 
 class Tempo(MIRAnalysis):
-    def process_audio(self, data) -> dict[str, float]:
+    def process_audio(self, data) -> dict[str, float | None]:
         """
         Tempo is kind of arbitrary. Calculate how many downbeats happen in a minute.
 
@@ -18,11 +18,13 @@ class Tempo(MIRAnalysis):
         """
         _, downbeats = data
 
+        if len(downbeats) < 2:
+            return {"tempo": 0}
+
         framewise_dbpm = []
         for i in range(len(downbeats) - 1):
             downbeat_delta = downbeats[i + 1] - downbeats[i]
             dbpm = 60 / (downbeat_delta + 1e-8)
             framewise_dbpm.append(dbpm)
 
-        # Return mean
         return {"tempo": sum(framewise_dbpm) / len(framewise_dbpm)}
